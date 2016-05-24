@@ -76,7 +76,7 @@ func (r *Restartd) Cleanup() {
 	for user, _ := range r.sockets {
 		r.RemoveUser(user)
 	}
-	fmt.Printf("bye")
+	fmt.Println("bye")
 }
 
 type Echo struct {
