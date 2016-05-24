@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
 )
 
 type Handler interface {
@@ -62,6 +63,12 @@ func (r *Restartd) listen(user string) {
 
 func (r *Restartd) Listen() {
 	defer r.Cleanup()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		r.bus <- true
+	}()
 	<-r.bus
 }
 
