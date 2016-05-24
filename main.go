@@ -9,17 +9,20 @@ import (
 type Restartd struct {
 	socketHome string
 	sockets    map[string]*net.UnixListener
+	bus        chan bool
 }
 
 func New(socketHome string) *Restartd {
 	r := Restartd{
 		socketHome,
 		make(map[string]*net.UnixListener),
+		make(chan bool),
 	}
 	return &r
 }
 
 func (r *Restartd) AddUser(user string) error {
+	os.Remove(r.socketHome + "/" + user)
 	l, err := net.ListenUnix("unix", &net.UnixAddr{r.socketHome + "/" + user, "unix"})
 	if err != nil {
 		return err
@@ -27,6 +30,11 @@ func (r *Restartd) AddUser(user string) error {
 	r.sockets[user] = l
 	go r.listen(user)
 	return nil
+}
+
+func (r *Restartd) RemoveUser(user string) {
+	delete(r.sockets, user)
+	os.Remove(r.socketHome + "/" + user)
 }
 
 func (r *Restartd) listen(user string) {
@@ -44,9 +52,16 @@ func (r *Restartd) listen(user string) {
 	}
 }
 
-func (r *Restartd) RemoveUser(user string) {
-	delete(r.sockets, user)
-	os.Remove(r.socketHome + "/" + user)
+func (r *Restartd) Listen() {
+	defer r.Cleanup()
+	<-r.bus
+}
+
+func (r *Restartd) Cleanup() {
+	for user, _ := range r.sockets {
+		r.RemoveUser(user)
+	}
+	fmt.Printf("bye")
 }
 
 func main() {
@@ -63,4 +78,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	r.Listen()
 }
