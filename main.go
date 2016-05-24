@@ -6,17 +6,23 @@ import (
 	"os"
 )
 
+type Handler interface {
+	Handle(req []byte) []byte
+}
+
 type Restartd struct {
 	socketHome string
 	sockets    map[string]*net.UnixListener
 	bus        chan bool
+	handler    Handler
 }
 
-func New(socketHome string) *Restartd {
+func New(socketHome string, handler Handler) *Restartd {
 	r := Restartd{
 		socketHome,
 		make(map[string]*net.UnixListener),
 		make(chan bool),
+		handler,
 	}
 	return &r
 }
@@ -64,8 +70,15 @@ func (r *Restartd) Cleanup() {
 	fmt.Printf("bye")
 }
 
+type Echo struct {
+}
+
+func (e Echo) Handle(req []byte) []byte {
+	return req
+}
+
 func main() {
-	r := New("/tmp")
+	r := New("/tmp", Echo{})
 	err := r.AddUser("pim")
 	if err != nil {
 		panic(err)
