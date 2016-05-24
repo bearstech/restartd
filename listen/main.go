@@ -52,7 +52,8 @@ func (r *Restartd) listen(user string) {
 		var buff [1024]byte
 		n, err := conn.Read(buff[:])
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error: %s\n", err)
+			conn.Close()
 		}
 		fmt.Printf("%s: %s\n", user, string(buff[:n]))
 		conn.Write(r.handler.Handle(buff[:n]))
