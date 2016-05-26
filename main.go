@@ -5,16 +5,16 @@ import (
 )
 
 func main() {
-	r := listen.New("/tmp", listen.Echo{})
-	err := r.AddUser("pim")
+	r := listen.New("/tmp")
+	err := r.AddUser("pim", listen.Echo{})
 	if err != nil {
 		panic(err)
 	}
-	err = r.AddUser("pam")
+	err = r.AddUser("pam", listen.Echo{})
 	if err != nil {
 		panic(err)
 	}
-	err = r.AddUser("poum")
+	err = r.AddUser("poum", listen.Echo{})
 	if err != nil {
 		panic(err)
 	}
