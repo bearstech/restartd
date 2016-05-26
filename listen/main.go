@@ -12,9 +12,26 @@ type Handler interface {
 }
 
 type channel struct {
-	name    string
+	user    string
 	socket  *net.UnixListener
 	handler Handler
+}
+
+func (c *channel) listen() {
+	for {
+		conn, err := c.socket.AcceptUnix()
+		if err != nil {
+			panic(err)
+		}
+		var buff [1024]byte
+		n, err := conn.Read(buff[:])
+		if err != nil {
+			fmt.Printf("Error: %s\n", err)
+			conn.Close()
+		}
+		fmt.Printf("%s: %s\n", c.user, string(buff[:n]))
+		conn.Write(c.handler.Handle(buff[:n]))
+	}
 }
 
 type Restartd struct {
@@ -38,35 +55,19 @@ func (r *Restartd) AddUser(user string, handler Handler) error {
 	if err != nil {
 		return err
 	}
-	r.sockets[user] = channel{
+	c := channel{
 		user,
 		l,
 		handler,
 	}
-	go r.listen(user)
+	r.sockets[user] = c
+	go c.listen()
 	return nil
 }
 
 func (r *Restartd) RemoveUser(user string) {
 	delete(r.sockets, user)
 	os.Remove(r.socketHome + "/" + user)
-}
-
-func (r *Restartd) listen(user string) {
-	for {
-		conn, err := r.sockets[user].socket.AcceptUnix()
-		if err != nil {
-			panic(err)
-		}
-		var buff [1024]byte
-		n, err := conn.Read(buff[:])
-		if err != nil {
-			fmt.Printf("Error: %s\n", err)
-			conn.Close()
-		}
-		fmt.Printf("%s: %s\n", user, string(buff[:n]))
-		conn.Write(r.sockets[user].handler.Handle(buff[:n]))
-	}
 }
 
 func (r *Restartd) Listen() {
