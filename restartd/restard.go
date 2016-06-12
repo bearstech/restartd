@@ -35,7 +35,7 @@ func (h *Handler) HandleMessage(msg protocol.Message) protocol.Response {
 
 func main() {
 	r := listen.New("/tmp")
-	err := r.AddUser("alice", &Handler{})
+	err := r.AddUser("restartctl", &Handler{})
 	if err != nil {
 		panic(err)
 	}

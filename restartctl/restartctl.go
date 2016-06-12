@@ -15,7 +15,11 @@ func main() {
 		panic(err)
 	}
 	msg := protocol.Message{service, command}
-	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{"/tmp/alice", "unix"})
+	socket := os.Getenv("RESTARTCTL_SOCKET")
+	if socket == "" {
+		socket = "/tmp/restartctl"
+	}
+	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{socket, "unix"})
 	if err != nil {
 		panic(err)
 	}
