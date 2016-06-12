@@ -10,6 +10,7 @@ import (
 )
 
 type Handler struct {
+	services []string
 }
 
 func (h *Handler) Handle(req io.Reader, resp io.Writer) {
@@ -39,10 +40,20 @@ func main() {
 	if fldr == "" {
 		fldr = "/tmp/"
 	}
-	r := listen.New(fldr)
-	err := r.AddUser("restartctl", &Handler{})
+	conf_folder := os.Getenv("RESTARTD_CONF")
+	if conf_folder == "" {
+		conf_folder = "/etc/restartd/conf.d"
+	}
+	confs, err := ReadConfFolder(conf_folder)
 	if err != nil {
 		panic(err)
+	}
+	r := listen.New(fldr)
+	for _, conf := range confs {
+		err = r.AddUser(conf.User, &Handler{conf.Services})
+		if err != nil {
+			panic(err)
+		}
 	}
 	r.Listen()
 }
