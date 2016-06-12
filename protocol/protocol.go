@@ -13,10 +13,10 @@ const (
 	Unknown
 )
 
-var Commands = []string{"status", "start", "stop", "restart", "reload"}
+var commands = []string{"status", "start", "stop", "restart", "reload"}
 
 func (c Command) Command() string {
-	return Commands[int(c)]
+	return commands[int(c)]
 }
 
 type Message struct {
@@ -30,8 +30,8 @@ type Response struct {
 }
 
 func ParseCommand(txt string) (Command, error) {
-	for i := 0; i < len(Commands); i++ {
-		if Commands[i] == txt {
+	for i := 0; i < len(commands); i++ {
+		if commands[i] == txt {
 			return Command(i), nil
 		}
 	}
