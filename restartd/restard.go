@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
+	"os"
 )
 
 type Handler struct {
@@ -34,11 +35,14 @@ func (h *Handler) HandleMessage(msg protocol.Message) protocol.Response {
 }
 
 func main() {
-	r := listen.New("/tmp")
+	fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
+	if fldr == "" {
+		fldr = "/tmp/"
+	}
+	r := listen.New(fldr)
 	err := r.AddUser("restartctl", &Handler{})
 	if err != nil {
 		panic(err)
 	}
 	r.Listen()
-
 }
