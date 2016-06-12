@@ -2,13 +2,14 @@ package listen
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/signal"
 )
 
 type Handler interface {
-	Handle(req []byte) []byte
+	Handle(req io.Reader, resp io.Writer)
 }
 
 type channel struct {
@@ -23,14 +24,7 @@ func (c *channel) listen() {
 		if err != nil {
 			panic(err)
 		}
-		var buff [1024]byte
-		n, err := conn.Read(buff[:])
-		if err != nil {
-			fmt.Printf("Error: %s\n", err)
-			conn.Close()
-		}
-		fmt.Printf("%s: %s\n", c.user, string(buff[:n]))
-		conn.Write(c.handler.Handle(buff[:n]))
+		c.handler.Handle(conn, conn)
 	}
 }
 
