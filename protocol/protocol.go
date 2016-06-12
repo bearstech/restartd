@@ -15,6 +15,10 @@ const (
 
 var Commands = []string{"status", "start", "stop", "restart", "reload"}
 
+func (c Command) Command() string {
+	return Commands[int(c)]
+}
+
 type Message struct {
 	Service string
 	Command Command
