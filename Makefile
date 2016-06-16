@@ -14,6 +14,10 @@ test:
 get:
 	go get gopkg.in/yaml.v2
 
+install:
+	cp restartd/restartd /usr/local/bin
+	cp restartctl/restartctl $(ROOTFS)/usr/local/bin
+
 clean:
 	rm -f restartctl/restartctl
 	rm -f restartd/restartd
