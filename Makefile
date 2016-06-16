@@ -17,3 +17,6 @@ get:
 clean:
 	rm -f restartctl/restartctl
 	rm -f restartd/restartd
+
+linux:
+	docker run -it --rm -v `pwd`:/go golang make
