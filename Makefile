@@ -19,7 +19,7 @@ clean:
 	rm -f restartd/restartd
 
 linux: src/gopkg.in/yaml.v2
-	docker run -it --rm -v `pwd`:/go golang make
+	docker run -it --rm -v $(GOPATH):/go -w /go/src/restartd golang make
 
 src/gopkg.in/yaml.v2:
-	docker run -it --rm -v `pwd`:/go golang make get
+	docker run -it --rm -v $(GOPATH):/go -w /go/src/restartd golang make get
