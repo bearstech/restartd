@@ -11,6 +11,9 @@ test:
 	cd protocol && go test
 	cd restartd && go test
 
+get:
+	go get gopkg.in/yaml.v2
+
 clean:
 	rm -f restartctl/restartctl
 	rm -f restartd/restartd
