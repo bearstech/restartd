@@ -1,8 +1,8 @@
 package main
 
 import (
-	"../listen"
-	"../protocol"
+	"restartd/listen"
+	"restartd/protocol"
 	"encoding/gob"
 	"fmt"
 	"io"

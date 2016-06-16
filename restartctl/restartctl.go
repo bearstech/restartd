@@ -1,7 +1,7 @@
 package main
 
 import (
-	"../protocol"
+	"restartd/protocol"
 	"encoding/gob"
 	"fmt"
 	"net"
