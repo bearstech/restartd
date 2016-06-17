@@ -43,13 +43,18 @@ func main() {
 	if fldr == "" {
 		fldr = "/tmp/"
 	}
+	log.Info("Socket folder is ", fldr)
+
+	r := listen.New(fldr)
+	defer r.Cleanup()
+
 	conf_folder := os.Getenv("RESTARTD_CONF")
+
 	if conf_folder == "" {
 		conf_folder = "/etc/restartd/conf.d"
 	}
-	log.Info("Socket folder is ", fldr)
-	r := listen.New(fldr)
-	defer r.Cleanup()
+	log.Info("Conf folder is ", conf_folder)
+
 	configs := func() {
 		confs, err := ReadConfFolder(conf_folder)
 		if err != nil {
@@ -59,7 +64,6 @@ func main() {
 			log.Error("No conf found. Add some yml file in " + conf_folder)
 			//os.Exit(-1)
 		}
-		log.Info("Conf folder is ", conf_folder)
 		for _, conf := range confs {
 			err = r.AddUser(conf.User, &Handler{conf.Services})
 			if err != nil {
