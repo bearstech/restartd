@@ -1,9 +1,9 @@
 package main
 
 import (
-	"restartd/protocol"
 	"encoding/gob"
 	"fmt"
+	"github.com/bearstech/restartd/protocol"
 	"net"
 	"os"
 )

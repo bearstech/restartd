@@ -1,10 +1,10 @@
 package main
 
 import (
-	"restartd/listen"
-	"restartd/protocol"
 	"encoding/gob"
 	"fmt"
+	"github.com/bearstech/restartd/listen"
+	"github.com/bearstech/restartd/protocol"
 	"io"
 	"os"
 )

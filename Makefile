@@ -1,26 +1,41 @@
-.PHONY: restartctl restartd
+.PHONY: restartctl restartd gopath
+
+GOPATH=${PWD}/gopath
 
 all: restartctl restartd
 
-restartctl:
-	cd restartctl && go build
-restartd:
-	cd restartd && go build
+gopath/src/github.com/bearstech/restartd:
+	mkdir -p gopath/src/github.com/bearstech
+	ln -s ../../../.. gopath/src/github.com/bearstech/restartd
 
-test:
-	cd protocol && go test
-	cd restartd && go test
-
-get:
+gopath/src/gopkg.in/yaml.v2:
 	go get gopkg.in/yaml.v2
 
+gopath: gopath/src/github.com/bearstech/restartd
+
+deps: gopath/src/gopkg.in/yaml.v2
+
+bin:
+	mkdir -p bin
+
+restartctl: bin gopath deps
+	go build -o bin/restartctl github.com/bearstech/restartd/restartctl/
+
+restartd: bin gopath deps
+	go build -o bin/restartd github.com/bearstech/restartd/restartd/
+
+test:
+	go test github.com/bearstech/restartd/restartctl/
+	go test github.com/bearstech/restartd/protocol/
+	go test github.com/bearstech/restartd/restartd/
+
 install:
-	cp restartd/restartd /usr/local/bin
-	cp restartctl/restartctl $(ROOTFS)/usr/local/bin
+	cp bin/restartd /usr/local/bin
+	cp bin/restartctl $(ROOTFS)/usr/local/bin
 
 clean:
-	rm -f restartctl/restartctl
-	rm -f restartd/restartd
+	rm -rf gopath
+	rm -rf bin
 
 linux: src/gopkg.in/yaml.v2
 	docker run -it --rm -v $(GOPATH):/go -w /go/src/restartd golang make
