@@ -39,3 +39,7 @@ clean:
 
 linux:
 	docker run -it --rm -v `pwd`:/go golang make
+
+vet:
+	go vet github.com/bearstech/restartd/restartctl
+	go vet github.com/bearstech/restartd/restartd
