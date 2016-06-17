@@ -49,6 +49,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	log.Info("Conf folder is ", conf_folder)
+	log.Info("Socket folder is ", fldr)
 	r := listen.New(fldr)
 	for _, conf := range confs {
 		err = r.AddUser(conf.User, &Handler{conf.Services})
