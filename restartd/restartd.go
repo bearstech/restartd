@@ -8,6 +8,8 @@ import (
 	"github.com/bearstech/restartd/protocol"
 	"io"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 type Handler struct {
@@ -50,7 +52,8 @@ func main() {
 		panic(err)
 	}
 	if len(confs) == 0 {
-		panic("No conf found. Add some yml file in " + conf_folder)
+		log.Error("No conf found. Add some yml file in " + conf_folder)
+		os.Exit(-1)
 	}
 	log.Info("Conf folder is ", conf_folder)
 	log.Info("Socket folder is ", fldr)
@@ -63,5 +66,16 @@ func main() {
 		log.Info("Add user ", conf.User)
 	}
 	log.Info("Number of users : ", len(confs))
+	defer r.Cleanup()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1)
+	go func() {
+		s := <-c
+		log.Info("Signal : ", s)
+		switch s {
+		case os.Interrupt:
+			r.Stop()
+		}
+	}()
 	r.Listen()
 }

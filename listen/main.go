@@ -5,7 +5,6 @@ import (
 	"io"
 	"net"
 	"os"
-	"os/signal"
 	"os/user"
 	"strconv"
 )
@@ -95,14 +94,12 @@ func (r *Restartd) RemoveUser(user string) {
 	os.Remove(r.socketHome + "/" + user)
 }
 
+func (r *Restartd) Stop() {
+	r.bus <- true
+}
+
 func (r *Restartd) Listen() {
 	defer r.Cleanup()
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		<-c
-		r.bus <- true
-	}()
 	<-r.bus
 }
 
