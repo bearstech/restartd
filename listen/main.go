@@ -5,7 +5,9 @@ import (
 	"io"
 	"net"
 	"os"
+	"os/user"
 	"os/signal"
+	"strconv"
 )
 
 type Handler interface {
@@ -44,11 +46,40 @@ func New(socketHome string) *Restartd {
 }
 
 func (r *Restartd) AddUser(username string, handler Handler) error {
-	os.Remove(r.socketHome + "/" + username)
-	l, err := net.ListenUnix("unix", &net.UnixAddr{r.socketHome + "/" + username, "unix"})
+	// verify the user exists on the system
+	User, err := user.Lookup(username)
 	if err != nil {
 		return err
 	}
+
+	os.Remove(r.socketHome + "/" + username)
+
+	// socket path
+	sp := r.socketHome + "/" + username
+
+	l, err := net.ListenUnix("unix", &net.UnixAddr{sp, "unix"})
+	if err != nil {
+		return err
+	}
+
+	// get uid user value as int
+	uid, err := strconv.Atoi(User.Uid)
+	if err != nil {
+		return err
+	}
+
+	// get gid user value as int
+	gid, err := strconv.Atoi(User.Gid)
+	if err != nil {
+		return err
+	}
+
+	// change socket ownsership to username
+        err = os.Chown(sp , uid, gid)
+	if err != nil {
+		return err
+	}
+
 	c := channel{
 		username,
 		l,
