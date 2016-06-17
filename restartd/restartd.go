@@ -49,6 +49,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	if len(confs) == 0 {
+		panic("No conf found. Add some yml file in " + conf_folder)
+	}
 	log.Info("Conf folder is ", conf_folder)
 	log.Info("Socket folder is ", fldr)
 	r := listen.New(fldr)
