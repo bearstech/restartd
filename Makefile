@@ -10,11 +10,13 @@ gopath/src/github.com/bearstech/restartd:
 
 gopath/src/gopkg.in/yaml.v2:
 	go get gopkg.in/yaml.v2
+
+gopath/src/github.com/Sirupsen/logrus:
 	go get github.com/Sirupsen/logrus
 
 gopath: gopath/src/github.com/bearstech/restartd
 
-deps: gopath/src/gopkg.in/yaml.v2
+deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus
 
 bin:
 	mkdir -p bin
