@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/gob"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/restartd/listen"
 	"github.com/bearstech/restartd/protocol"
 	"io"
@@ -54,6 +55,8 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		log.Info("Add user ", conf.User)
 	}
+	log.Info("Number of users : ", len(confs))
 	r.Listen()
 }

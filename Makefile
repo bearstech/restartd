@@ -10,6 +10,7 @@ gopath/src/github.com/bearstech/restartd:
 
 gopath/src/gopkg.in/yaml.v2:
 	go get gopkg.in/yaml.v2
+	go get github.com/Sirupsen/logrus
 
 gopath: gopath/src/github.com/bearstech/restartd
 
