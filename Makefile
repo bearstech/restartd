@@ -1,6 +1,6 @@
 .PHONY: restartctl restartd gopath
 
-GOPATH=${PWD}/gopath
+GOPATH=$(shell pwd)/gopath
 
 all: restartctl restartd
 
@@ -37,8 +37,5 @@ clean:
 	rm -rf gopath
 	rm -rf bin
 
-linux: src/gopkg.in/yaml.v2
-	docker run -it --rm -v $(GOPATH):/go -w /go/src/restartd golang make
-
-src/gopkg.in/yaml.v2:
-	docker run -it --rm -v $(GOPATH):/go -w /go/src/restartd golang make get
+linux:
+	docker run -it --rm -v `pwd`:/go golang make
