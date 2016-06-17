@@ -19,7 +19,7 @@ func ReadConf(raw []byte, conf *Conf) error {
 }
 
 func ReadConfFolder(conf_folder string) ([]*Conf, error) {
-	conf_paths, err := filepath.Glob(filepath.Join(conf_folder, "*.ya?ml"))
+	conf_paths, err := filepath.Glob(filepath.Join(conf_folder, "*.yml"))
 	if err != nil {
 		return nil, err
 	}
