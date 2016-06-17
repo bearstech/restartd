@@ -29,4 +29,5 @@ func main() {
 	var response protocol.Response
 	dec.Decode(&response)
 	fmt.Println(response)
+	os.Exit(response.Code)
 }
