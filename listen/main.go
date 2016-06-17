@@ -5,8 +5,8 @@ import (
 	"io"
 	"net"
 	"os"
-	"os/user"
 	"os/signal"
+	"os/user"
 	"strconv"
 )
 
@@ -75,7 +75,7 @@ func (r *Restartd) AddUser(username string, handler Handler) error {
 	}
 
 	// change socket ownsership to username
-        err = os.Chown(sp , uid, gid)
+	err = os.Chown(sp, uid, gid)
 	if err != nil {
 		return err
 	}
