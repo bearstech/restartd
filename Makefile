@@ -1,6 +1,6 @@
 .PHONY: restartctl restartd gopath
 
-GOPATH=$(shell pwd)/gopath
+export GOPATH:=$(shell pwd)/gopath
 
 all: restartctl restartd
 
