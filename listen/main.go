@@ -45,6 +45,10 @@ func New(socketHome string) *Restartd {
 }
 
 func (r *Restartd) AddUser(username string, handler Handler) error {
+	// don't add when it already exist
+	if _, ok := r.sockets[username]; ok {
+		return nil
+	}
 	// verify the user exists on the system
 	User, err := user.Lookup(username)
 	if err != nil {

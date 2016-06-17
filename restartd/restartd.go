@@ -47,35 +47,46 @@ func main() {
 	if conf_folder == "" {
 		conf_folder = "/etc/restartd/conf.d"
 	}
-	confs, err := ReadConfFolder(conf_folder)
-	if err != nil {
-		panic(err)
-	}
-	if len(confs) == 0 {
-		log.Error("No conf found. Add some yml file in " + conf_folder)
-		os.Exit(-1)
-	}
-	log.Info("Conf folder is ", conf_folder)
 	log.Info("Socket folder is ", fldr)
 	r := listen.New(fldr)
-	for _, conf := range confs {
-		err = r.AddUser(conf.User, &Handler{conf.Services})
+	defer r.Cleanup()
+	configs := func() {
+		confs, err := ReadConfFolder(conf_folder)
 		if err != nil {
 			panic(err)
 		}
-		log.Info("Add user ", conf.User)
+		if len(confs) == 0 {
+			log.Error("No conf found. Add some yml file in " + conf_folder)
+			//os.Exit(-1)
+		}
+		log.Info("Conf folder is ", conf_folder)
+		for _, conf := range confs {
+			err = r.AddUser(conf.User, &Handler{conf.Services})
+			if err != nil {
+				panic(err)
+			}
+			log.Info("Add user ", conf.User)
+		}
+		log.Info("Number of users : ", len(confs))
 	}
-	log.Info("Number of users : ", len(confs))
-	defer r.Cleanup()
+	// initial config
+	configs()
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1)
 	go func() {
-		s := <-c
-		log.Info("Signal : ", s)
-		switch s {
-		case os.Interrupt:
-			r.Stop()
+		for {
+			s := <-c
+			log.Info("Signal : ", s)
+			switch s {
+			case os.Interrupt:
+				r.Stop()
+			case syscall.SIGHUP:
+				configs()
+			}
 		}
 	}()
+
+	// listen and block
 	r.Listen()
 }
