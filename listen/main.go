@@ -43,18 +43,18 @@ func New(socketHome string) *Restartd {
 	return &r
 }
 
-func (r *Restartd) AddUser(user string, handler Handler) error {
-	os.Remove(r.socketHome + "/" + user)
-	l, err := net.ListenUnix("unix", &net.UnixAddr{r.socketHome + "/" + user, "unix"})
+func (r *Restartd) AddUser(username string, handler Handler) error {
+	os.Remove(r.socketHome + "/" + username)
+	l, err := net.ListenUnix("unix", &net.UnixAddr{r.socketHome + "/" + username, "unix"})
 	if err != nil {
 		return err
 	}
 	c := channel{
-		user,
+		username,
 		l,
 		handler,
 	}
-	r.sockets[user] = c
+	r.sockets[username] = c
 	go c.listen()
 	return nil
 }
