@@ -39,7 +39,7 @@ func (h *Handler) Handle(req io.Reader, resp io.Writer) {
 
 func (h *Handler) HandleMessage(msg protocol.Message) protocol.Response {
 	ok := int32(0)
-	message := fmt.Sprintf("%s was sent to %s", msg.Command.String(), msg.Service)
+	message := fmt.Sprintf("%s was sent to %s", msg.Command.String(), *msg.Service)
 	return protocol.Response{
 		Code:    &ok,
 		Message: &message,

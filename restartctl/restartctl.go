@@ -35,6 +35,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(response)
+	fmt.Println(*response.Code, ":", *response.Message)
 	os.Exit(int(*response.Code))
 }
