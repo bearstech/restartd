@@ -1,39 +1,51 @@
 package protocol
 
-import "errors"
-
-type Command int
-
-const (
-	Status Command = iota
-	Start
-	Stop
-	Restart
-	Reload
-	Unknown
+import (
+	"encoding/binary"
+	"errors"
+	"github.com/golang/protobuf/proto"
+	"io"
 )
 
-var commands = []string{"status", "start", "stop", "restart", "reload"}
-
-func (c Command) Command() string {
-	return commands[int(c)]
-}
-
-type Message struct {
-	Service string
-	Command Command
-}
-
-type Response struct {
-	Code    int
-	Message string
-}
-
-func ParseCommand(txt string) (Command, error) {
-	for i := 0; i < len(commands); i++ {
-		if commands[i] == txt {
-			return Command(i), nil
-		}
+func ParseCommand(txt string) (Message_Commands, error) {
+	v, ok := Message_Commands_value[txt]
+	if ok {
+		return Message_Commands(v), nil
+	} else {
+		return Message_Commands(-1), errors.New("Command unknown")
 	}
-	return Unknown, errors.New("Command unknown")
+}
+
+func Write(wire io.Writer, msg proto.Message) error {
+	txt, err := proto.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	err = binary.Write(wire, binary.LittleEndian, uint16(len(txt)))
+	if err != nil {
+		return err
+	}
+	_, err = wire.Write([]byte(txt))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Read(wire io.Reader, msg proto.Message) error {
+	var size uint16
+	err := binary.Read(wire, binary.LittleEndian, &size)
+	if err != nil {
+		return err
+	}
+	buf := make([]byte, size)
+	_, err = io.ReadFull(wire, buf)
+	if err != nil {
+		return err
+	}
+	err = proto.Unmarshal(buf, msg)
+	if err != nil {
+		return err
+	}
+	return nil
 }

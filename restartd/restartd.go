@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/gob"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/restartd/listen"
@@ -18,24 +17,33 @@ type Handler struct {
 
 func (h *Handler) Handle(req io.Reader, resp io.Writer) {
 	var msg protocol.Message
-	dec := gob.NewDecoder(req)
-	err := dec.Decode(&msg)
+	err := protocol.Read(req, &msg)
 	fmt.Println(msg)
 	var r protocol.Response
 	if err != nil {
-		r = protocol.Response{1, err.Error()}
+		log.Error("Error while reading a command: ", err)
+		oups := int32(1)
+		msg := err.Error()
+		r = protocol.Response{
+			Code:    &oups,
+			Message: &msg,
+		}
 	} else {
 		r = h.HandleMessage(msg)
 	}
-	enc := gob.NewEncoder(resp)
-	err = enc.Encode(&r)
+	err = protocol.Write(resp, &r)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (h *Handler) HandleMessage(msg protocol.Message) protocol.Response {
-	return protocol.Response{0, fmt.Sprintf("%s was sent to %s", msg.Command.Command(), msg.Service)}
+	ok := int32(0)
+	message := fmt.Sprintf("%s was sent to %s", msg.Command.String(), msg.Service)
+	return protocol.Response{
+		Code:    &ok,
+		Message: &message,
+	}
 }
 
 func main() {

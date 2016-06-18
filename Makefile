@@ -14,9 +14,12 @@ gopath/src/gopkg.in/yaml.v2:
 gopath/src/github.com/Sirupsen/logrus:
 	go get github.com/Sirupsen/logrus
 
+gopath/src/github.com/golang/protobuf/proto:
+	go get github.com/golang/protobuf/proto
+
 gopath: gopath/src/github.com/bearstech/restartd
 
-deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus
+deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus gopath/src/github.com/golang/protobuf/proto
 
 bin:
 	mkdir -p bin
@@ -42,6 +45,9 @@ clean:
 
 linux:
 	docker run -it --rm -v `pwd`:/go golang make
+
+protoc:
+	protoc --go_out=. protocol/*.proto
 
 vet:
 	go vet github.com/bearstech/restartd/restartctl

@@ -1,0 +1,18 @@
+package protocol;
+
+message Message {
+    required string Service = 1;
+    enum Commands {
+        status = 0;
+        start = 1;
+        stop = 2;
+        restart = 3;
+        reload = 4;
+    }
+    required Commands Command= 2;
+}
+
+message Response {
+    required int32 Code = 1;
+    optional string Message = 2;
+}

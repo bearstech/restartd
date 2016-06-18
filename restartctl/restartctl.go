@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/gob"
 	"fmt"
 	"github.com/bearstech/restartd/protocol"
 	"net"
@@ -14,20 +13,28 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	msg := protocol.Message{service, command}
+	msg := protocol.Message{
+		Service: &service,
+		Command: &command,
+	}
 	socket := os.Getenv("RESTARTCTL_SOCKET")
 	if socket == "" {
 		socket = "/tmp/restartctl"
 	}
-	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{socket, "unix"})
+	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{socket,
+		"unix"})
 	if err != nil {
 		panic(err)
 	}
-	enc := gob.NewEncoder(conn)
-	enc.Encode(&msg)
-	dec := gob.NewDecoder(conn)
+	err = protocol.Write(conn, &msg)
+	if err != nil {
+		panic(err)
+	}
 	var response protocol.Response
-	dec.Decode(&response)
+	err = protocol.Read(conn, &response)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(response)
-	os.Exit(response.Code)
+	os.Exit(int(*response.Code))
 }
