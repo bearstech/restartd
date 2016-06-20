@@ -30,7 +30,8 @@ restartctl: bin gopath deps
 restartd: bin gopath deps
 	go build -o bin/restartd github.com/bearstech/restartd/restartd/
 
-test:
+test: gopath/src/github.com/bearstech/restartd
+	go test github.com/bearstech/restartd/listen/
 	go test github.com/bearstech/restartd/restartctl/
 	go test github.com/bearstech/restartd/protocol/
 	go test github.com/bearstech/restartd/restartd/
