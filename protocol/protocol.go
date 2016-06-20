@@ -3,6 +3,7 @@ package protocol
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"github.com/golang/protobuf/proto"
 	"io"
 )
@@ -21,13 +22,20 @@ func Write(wire io.Writer, msg proto.Message) error {
 	if err != nil {
 		return err
 	}
-	err = binary.Write(wire, binary.LittleEndian, uint16(len(txt)))
+	size := len(txt)
+	if size >= 65536 {
+		return errors.New(fmt.Sprintf("Message is too big : %i >= 65536", size))
+	}
+	err = binary.Write(wire, binary.LittleEndian, uint16(size))
 	if err != nil {
 		return err
 	}
-	_, err = wire.Write([]byte(txt))
+	s, err := wire.Write([]byte(txt))
 	if err != nil {
 		return err
+	}
+	if s < size {
+		return errors.New("Partial write")
 	}
 	return nil
 }
@@ -39,9 +47,12 @@ func Read(wire io.Reader, msg proto.Message) error {
 		return err
 	}
 	buf := make([]byte, size)
-	_, err = io.ReadFull(wire, buf)
+	s, err := io.ReadFull(wire, buf)
 	if err != nil {
 		return err
+	}
+	if uint16(s) < size {
+		return errors.New("Partial read")
 	}
 	err = proto.Unmarshal(buf, msg)
 	if err != nil {
