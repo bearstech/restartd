@@ -5,39 +5,16 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/restartd/listen"
 	"github.com/bearstech/restartd/protocol"
-	"io"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-type Handler struct {
+type Action struct {
 	services []string
 }
 
-func (h *Handler) Handle(req io.Reader, resp io.Writer) {
-	var msg protocol.Message
-	err := protocol.Read(req, &msg)
-	fmt.Println(msg)
-	var r protocol.Response
-	if err != nil {
-		log.Error("Error while reading a command: ", err)
-		oups := int32(1)
-		msg := err.Error()
-		r = protocol.Response{
-			Code:    &oups,
-			Message: &msg,
-		}
-	} else {
-		r = h.HandleMessage(msg)
-	}
-	err = protocol.Write(resp, &r)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (h *Handler) HandleMessage(msg protocol.Message) protocol.Response {
+func (h *Action) Handle(msg protocol.Message) protocol.Response {
 	ok := int32(0)
 	message := fmt.Sprintf("%s was sent to %s", msg.Command.String(), *msg.Service)
 	return protocol.Response{
@@ -73,7 +50,7 @@ func main() {
 			//os.Exit(-1)
 		}
 		for _, conf := range confs {
-			err = r.AddUser(conf.User, &Handler{conf.Services})
+			err = r.AddUser(conf.User, protocol.NewProtocolHandler(&Action{conf.Services}))
 			if err != nil {
 				panic(err)
 			}
