@@ -1,6 +1,10 @@
 .PHONY: restartctl restartd gopath
 
 export GOPATH:=$(shell pwd)/gopath
+GOTOOLS = \
+	golang.org/x/tools/cmd/cover \
+	github.com/axw/gocov/gocov \
+	gopkg.in/matm/v1/gocov-html
 
 all: restartctl restartd
 
@@ -56,3 +60,12 @@ protoc:
 vet:
 	go vet github.com/bearstech/restartd/restartctl
 	go vet github.com/bearstech/restartd/restartd
+
+tools:
+	go get -u -v $(GOTOOLS)
+
+cover:
+	go test github.com/bearstech/restartd/listen/ --cover
+	go test github.com/bearstech/restartd/restartctl/ --cover
+	go test github.com/bearstech/restartd/protocol/ --cover
+	go test github.com/bearstech/restartd/restartd/ --cover
