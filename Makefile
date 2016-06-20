@@ -14,12 +14,15 @@ gopath/src/gopkg.in/yaml.v2:
 gopath/src/github.com/Sirupsen/logrus:
 	go get github.com/Sirupsen/logrus
 
+gopath/src/github.com/coreos/go-systemd/dbus:
+	go get github.com/coreos/go-systemd/dbus
+
 gopath/src/github.com/golang/protobuf/proto:
 	go get github.com/golang/protobuf/proto
 
 gopath: gopath/src/github.com/bearstech/restartd
 
-deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus gopath/src/github.com/golang/protobuf/proto
+deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus gopath/src/github.com/golang/protobuf/proto gopath/src/github.com/coreos/go-systemd/dbus
 
 bin:
 	mkdir -p bin
