@@ -1,27 +1,14 @@
 package main
 
 import (
-	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/restartd/listen"
 	"github.com/bearstech/restartd/protocol"
+	"github.com/bearstech/restartd/systemd"
 	"os"
 	"os/signal"
 	"syscall"
 )
-
-type Action struct {
-	services []string
-}
-
-func (h *Action) Handle(msg protocol.Message) protocol.Response {
-	ok := int32(0)
-	message := fmt.Sprintf("%s was sent to %s", msg.Command.String(), *msg.Service)
-	return protocol.Response{
-		Code:    &ok,
-		Message: &message,
-	}
-}
 
 func main() {
 	fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
@@ -50,7 +37,7 @@ func main() {
 			//os.Exit(-1)
 		}
 		for _, conf := range confs {
-			err = r.AddUser(conf.User, protocol.NewProtocolHandler(&Action{conf.Services}))
+			err = r.AddUser(conf.User, protocol.NewProtocolHandler(&systemd.HandlerSystemd{conf.Services}))
 			if err != nil {
 				panic(err)
 			}
