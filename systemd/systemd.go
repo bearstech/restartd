@@ -41,7 +41,7 @@ func GetStatus(unitName string) (string, error) {
 
 	// call to systemd-dbus
 	// step 1, get all **loaded** units
-	UnitsStatus, err := conn.ListUnits()
+	unitsStatus, err := conn.ListUnits()
 	if err != nil {
 		message := fmt.Sprintf("Error getting %s service status",
 			serviceName)
@@ -49,7 +49,7 @@ func GetStatus(unitName string) (string, error) {
 	}
 
 	// for each units, find the requested one
-	for _, v := range UnitsStatus {
+	for _, v := range unitsStatus {
 		if strings.Contains(v.Name, serviceName) == true {
 			// create basic response message
 			message := LoadedStatusMessage(v)
@@ -60,7 +60,7 @@ func GetStatus(unitName string) (string, error) {
 	}
 
 	// go deeper
-	UnitsFiles, err := conn.ListUnitFiles()
+	unitsFiles, err := conn.ListUnitFiles()
 	if err != nil {
 		message := fmt.Sprintf("Error getting %s service file",
 			serviceName)
@@ -68,7 +68,7 @@ func GetStatus(unitName string) (string, error) {
 	}
 
 	// search for unit
-	for _, v := range UnitsFiles {
+	for _, v := range unitsFiles {
 
 		found = strings.Contains(v.Path, serviceName)
 
