@@ -8,7 +8,7 @@ type HandlerTest struct {
 }
 
 func (h *HandlerTest) Handle(m Message) (r Response) {
-	ok := int32(0)
+	ok := Response_success
 	r = Response{
 		Code: &ok,
 	}
@@ -24,7 +24,7 @@ func TestHandler(t *testing.T) {
 		Command: &cmd,
 	}
 	r := h.Handle(m)
-	if *r.Code != int32(0) {
+	if *r.Code != Response_success {
 		t.Fail()
 	}
 }
