@@ -3,11 +3,11 @@ package protocol;
 message Message {
     required string Service = 1;
     enum Commands {
-        status = 0;
-        start = 1;
-        stop = 2;
+        status  = 0;
+        start   = 1;
+        stop    = 2;
         restart = 3;
-        reload = 4;
+        reload  = 4;
     }
     required Commands Command= 2;
 }
@@ -15,21 +15,21 @@ message Message {
 message Response {
     enum Codes {
         success     = 0;
-        error       = 1;
-        err_missing = 2;
-        err_parsing = 3;
-        err_reading = 4;
-        err_cmd     = 5;
-        err_status  = 6;
-        err_start   = 7;
-        err_stop    = 8;
-        err_restart = 9;
-        err_reload  = 10;
-        suc_reload  = 11;
-        suc_status  = 12;
-        suc_start   = 13;
-        suc_stop    = 14;
-        suc_restart = 15;
+        suc_reload  = 1;
+        suc_status  = 2;
+        suc_start   = 3;
+        suc_stop    = 4;
+        suc_restart = 5;
+        error       = 100;
+        err_missing = 101;
+        err_parsing = 102;
+        err_reading = 103;
+        err_cmd     = 104;
+        err_status  = 105;
+        err_start   = 106;
+        err_stop    = 107;
+        err_restart = 108;
+        err_reload  = 109;
     }
     required Codes Code = 1;
     optional string Message = 2;
