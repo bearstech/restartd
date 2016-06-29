@@ -4,22 +4,13 @@ package systemd
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	"github.com/bearstech/restartd/protocol"
 	"github.com/coreos/go-systemd/dbus"
 	"strings"
 )
 
-// struct HandlerSystemd
-// implements Handler interface
-type HandlerSystemd struct {
-	// array containing services (names)
-	Services []string
-}
-
 // func isUnit()
 // verify that requested unit is declared in a config file
-func isUnit(u string, s []string) bool {
+func IsUnit(u string, s []string) bool {
 
 	for _, v := range s {
 		if v == u {
@@ -31,136 +22,14 @@ func isUnit(u string, s []string) bool {
 
 }
 
-// func Handle
-// implemented by Handler interface
-func (h *HandlerSystemd) Handle(m protocol.Message) (r protocol.Response) {
-
-	var code protocol.Response_Codes
-	var message string
-
-	// verify if requested unit exists
-	ret := isUnit(m.GetService(), h.Services)
-
-	// if unit does not exists
-	if ret != true {
-		// write appropriate message
-		code = protocol.Response_err_missing
-		message = fmt.Sprintf("Service %s does not exists",
-			m.GetService())
-	} else {
-
-		// switch between all supported commands
-		switch m.GetCommand() {
-
-		case protocol.Message_status:
-			// Get status for requested unit
-			ret, err := getStatus(m.GetService())
-
-			// error checking
-			// write appropriate messages
-			if err != nil {
-				message = fmt.Sprintf("Error getting %s service status",
-					m.GetService())
-				code = protocol.Response_err_status
-				log.Error(message)
-			} else {
-				message = ret
-				code = protocol.Response_suc_status
-			}
-
-			break
-
-		case protocol.Message_start:
-			// start unit
-			err := startUnit(m.GetService())
-
-			// error checking
-			if err != nil {
-				message = fmt.Sprintf("Error starting %s service",
-					m.GetService)
-				code = protocol.Response_err_start
-			} else {
-				message = fmt.Sprintf("%s service is started",
-					m.GetService())
-				code = protocol.Response_suc_start
-			}
-
-			break
-
-		case protocol.Message_stop:
-			// stop unit
-			err := stopUnit(m.GetService())
-
-			// error checking
-			if err != nil {
-				message = fmt.Sprintf("Error stopping %s service",
-					m.GetService)
-				code = protocol.Response_err_stop
-			} else {
-				message = fmt.Sprintf("%s service is stopped",
-					m.GetService())
-				code = protocol.Response_suc_stop
-			}
-
-			break
-
-		case protocol.Message_restart:
-			// restart unit
-			err := restartUnit(m.GetService())
-
-			// error checking
-			if err != nil {
-				message = fmt.Sprintf("Error restarting %s service",
-					m.GetService)
-				code = protocol.Response_err_restart
-			} else {
-				message = fmt.Sprintf("%s service is restarted",
-					m.GetService())
-				code = protocol.Response_suc_restart
-			}
-
-			break
-
-		case protocol.Message_reload:
-			// reload unit
-			err := reloadUnit(m.GetService())
-
-			// error checking
-			if err != nil {
-				message = fmt.Sprintf("Error reloading %s service",
-					m.GetService())
-				code = protocol.Response_err_restart
-			} else {
-				message = fmt.Sprintf("%s service is reloaded",
-					m.GetService())
-				code = protocol.Response_suc_restart
-			}
-
-			break
-
-		default:
-			code = protocol.Response_err_cmd
-			message = fmt.Sprint("Command %s not supported",
-				m.GetCommand)
-		}
-	}
-
-	// send message to restartctl client
-	return protocol.Response{
-		Code:    &code,
-		Message: &message,
-	}
-
-}
-
 // getStatus
 // Fetch status for a requested unit
-func getStatus(unitName string) (string, error) {
+func GetStatus(unitName string) (string, error) {
 
 	var found bool
 
 	// concatenante uinitName + .service in a serviceName string
-	serviceName := createServiceName(unitName)
+	serviceName := CreateServiceName(unitName)
 
 	// create systemd-dbus conn
 	conn, err := dbus.New()
@@ -183,7 +52,7 @@ func getStatus(unitName string) (string, error) {
 	for _, v := range UnitsStatus {
 		if strings.Contains(v.Name, serviceName) == true {
 			// create basic response message
-			message := loadedStatusMessage(v)
+			message := LoadedStatusMessage(v)
 
 			// return message to restartctl client
 			return message, err
@@ -205,7 +74,7 @@ func getStatus(unitName string) (string, error) {
 
 		if found == true {
 			// create basic response message
-			message := unloadedStatusMessage(v)
+			message := UnloadedStatusMessage(v)
 
 			// return message to stopctl client
 			return message, err
@@ -221,13 +90,13 @@ func getStatus(unitName string) (string, error) {
 }
 
 // createServiceName
-func createServiceName(unitName string) string {
+func CreateServiceName(unitName string) string {
 	return fmt.Sprintf("%s.service", unitName)
 }
 
 // loadedStatusMessage
 // create a basic status message (used with loaded units)
-func loadedStatusMessage(unit dbus.UnitStatus) string {
+func LoadedStatusMessage(unit dbus.UnitStatus) string {
 
 	return fmt.Sprintf("Name: %s\n\tDescription: %s\n\tLoad: "+
 		"%s\n\tActive: %s\n\tState: %s\n", unit.Name, unit.Description,
@@ -237,7 +106,7 @@ func loadedStatusMessage(unit dbus.UnitStatus) string {
 
 // unloadedStatusMessage
 // ceate a basic status message (used with unloaded units)
-func unloadedStatusMessage(unitFile dbus.UnitFile) string {
+func UnloadedStatusMessage(unitFile dbus.UnitFile) string {
 
 	return fmt.Sprintf("Name: %s\n\tStatus: %s\n", unitFile.Path,
 		unitFile.Type)
@@ -245,10 +114,10 @@ func unloadedStatusMessage(unitFile dbus.UnitFile) string {
 }
 
 // startUnit
-func startUnit(unitName string) error {
+func StartUnit(unitName string) error {
 
 	// concatenante uinitName + .service in a serviceName string
-	serviceName := createServiceName(unitName)
+	serviceName := CreateServiceName(unitName)
 
 	ch := make(chan string)
 
@@ -273,10 +142,10 @@ func startUnit(unitName string) error {
 }
 
 // stopUnit
-func stopUnit(unitName string) error {
+func StopUnit(unitName string) error {
 
 	// concatenante uinitName + .service in a serviceName string
-	serviceName := createServiceName(unitName)
+	serviceName := CreateServiceName(unitName)
 
 	ch := make(chan string)
 
@@ -300,10 +169,10 @@ func stopUnit(unitName string) error {
 
 }
 
-func restartUnit(unitName string) error {
+func RestartUnit(unitName string) error {
 
 	// concatenante uinitName + .service in a serviceName string
-	serviceName := createServiceName(unitName)
+	serviceName := CreateServiceName(unitName)
 
 	ch := make(chan string)
 
@@ -327,10 +196,10 @@ func restartUnit(unitName string) error {
 
 }
 
-func reloadUnit(unitName string) error {
+func ReloadUnit(unitName string) error {
 
 	// concatenante uinitName + .service in a serviceName string
-	serviceName := createServiceName(unitName)
+	serviceName := CreateServiceName(unitName)
 
 	ch := make(chan string)
 
