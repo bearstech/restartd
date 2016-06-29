@@ -14,22 +14,22 @@ message Message {
 
 message Response {
     enum Codes {
-        success = 0;
-        error = 1;
+        success     = 0;
+        error       = 1;
         err_missing = 2;
         err_parsing = 3;
         err_reading = 4;
-        err_cmd = 5;
-        err_status = 6;
-        suc_status = 7;
-        err_start = 8;
-        suc_start = 9;
-        err_stop = 10;
-        suc_stop = 11;
-        err_restart = 12;
-        suc_restart = 13;
-        err_reload = 14;
-        suc_reload = 15;
+        err_cmd     = 5;
+        err_status  = 6;
+        err_start   = 7;
+        err_stop    = 8;
+        err_restart = 9;
+        err_reload  = 10;
+        suc_reload  = 11;
+        suc_status  = 12;
+        suc_start   = 13;
+        suc_stop    = 14;
+        suc_restart = 15;
     }
     required Codes Code = 1;
     optional string Message = 2;
