@@ -27,7 +27,7 @@ func (h *ProtocolHandler) Handle(req io.Reader, resp io.Writer) {
 	var r Response
 	if err != nil {
 		log.Error("Error while reading a command: ", err)
-		oups := int32(1)
+		oups := Response_err_reading
 		msg := err.Error()
 		r = Response{
 			Code:    &oups,
