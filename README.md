@@ -3,22 +3,19 @@ restartd
 
 restartd allow systemd service control through unix socket.
 
-Install
-=======
-
-Fetch sources
-
-    git clone git@github.com:bearstech/restartd.git $GOPATH/src/restartd
-
-Get deps
-
-    cd $GOPATH/src/restartd && make get
-
 Build
+-----
 
-    cd $GOPATH/src/restard && make
+    make
 
-Install
+Big picture
+-----------
 
-    cd $GOPATH/src/restartd && make install ROOTFS=/path/to/rootfs
+_restartd_ run as root, talks to systemd via DBUS, listen one UNIX socket per user.
 
+_restartctl_ send commands to _restartd_, just like _service_.
+
+Licence
+-------
+
+    3 terms BSD licence, © 2016 Mathieu Lecarme, Wilfried Ollivier
