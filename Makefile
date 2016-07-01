@@ -42,6 +42,7 @@ test: gopath/src/github.com/bearstech/restartd
 	go test github.com/bearstech/restartd/restartctl/
 	go test github.com/bearstech/restartd/protocol/
 	go test github.com/bearstech/restartd/restartd/
+	go test github.com/bearstech/restartd/model/
 
 install:
 	cp bin/restartd /usr/local/bin
@@ -55,7 +56,7 @@ linux:
 	docker run -it --rm -v `pwd`:/go golang make
 
 protoc:
-	protoc --go_out=. protocol/*.proto
+	protoc --go_out=. model/*.proto
 
 vet:
 	go vet github.com/bearstech/restartd/restartctl

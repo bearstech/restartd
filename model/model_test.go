@@ -1,7 +1,8 @@
-package protocol
+package model
 
 import (
 	"bytes"
+	"github.com/bearstech/restartd/protocol"
 	"testing"
 )
 
@@ -30,14 +31,14 @@ func TestMessage(t *testing.T) {
 		Command: &cmd,
 	}
 	network := new(bytes.Buffer) // Stand-in for the network.
-	err := Write(network, &m)
+	err := protocol.Write(network, &m)
 	if err != nil {
 		t.Error("Write trouble : ", err)
 	}
 	s := network.String()
 	t.Log("Wire : ", len(s), s)
 	var m2 Message
-	err = Read(network, &m2)
+	err = protocol.Read(network, &m2)
 	if err != nil {
 		t.Error("Read trouble : ", err)
 	}

@@ -3,7 +3,7 @@ package main
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/restartd/listen"
-	"github.com/bearstech/restartd/protocol"
+	"github.com/bearstech/restartd/model"
 	"os"
 	"os/signal"
 	"syscall"
@@ -36,7 +36,7 @@ func main() {
 			//os.Exit(-1)
 		}
 		for _, conf := range confs {
-			err = r.AddUser(conf.User, protocol.NewProtocolHandler(&HandlerSystemd{conf.Services}))
+			err = r.AddUser(conf.User, model.NewProtocolHandler(&HandlerSystemd{conf.Services}))
 			if err != nil {
 				panic(err)
 			}

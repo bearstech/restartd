@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/bearstech/restartd/model"
 	"github.com/bearstech/restartd/protocol"
 	"net"
 	"os"
@@ -9,11 +10,11 @@ import (
 
 func main() {
 	service := os.Args[1]
-	command, err := protocol.ParseCommand(os.Args[2])
+	command, err := model.ParseCommand(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
-	msg := protocol.Message{
+	msg := model.Message{
 		Service: &service,
 		Command: &command,
 	}
@@ -30,7 +31,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	var response protocol.Response
+	var response model.Response
 	err = protocol.Read(conn, &response)
 	if err != nil {
 		panic(err)

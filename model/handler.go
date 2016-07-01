@@ -1,8 +1,9 @@
-package protocol
+package model
 
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"github.com/bearstech/restartd/protocol"
 	"io"
 )
 
@@ -22,7 +23,7 @@ func NewProtocolHandler(handler Handler) *ProtocolHandler {
 
 func (h *ProtocolHandler) Handle(req io.Reader, resp io.Writer) {
 	var msg Message
-	err := Read(req, &msg)
+	err := protocol.Read(req, &msg)
 	fmt.Println(msg)
 	var r Response
 	if err != nil {
@@ -36,7 +37,7 @@ func (h *ProtocolHandler) Handle(req io.Reader, resp io.Writer) {
 	} else {
 		r = h.handler.Handle(msg)
 	}
-	err = Write(resp, &r)
+	err = protocol.Write(resp, &r)
 	if err != nil {
 		panic(err)
 	}
