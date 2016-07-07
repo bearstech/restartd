@@ -29,14 +29,14 @@ func (c *channel) listen() {
 	}
 }
 
-type Restartd struct {
+type Dispatcher struct {
 	socketHome string
 	sockets    map[string]channel
 	bus        chan bool
 }
 
-func New(socketHome string) *Restartd {
-	r := Restartd{
+func New(socketHome string) *Dispatcher {
+	r := Dispatcher{
 		socketHome,
 		make(map[string]channel),
 		make(chan bool),
@@ -44,7 +44,7 @@ func New(socketHome string) *Restartd {
 	return &r
 }
 
-func (r *Restartd) AddUser(username string, handler Handler) error {
+func (r *Dispatcher) AddUser(username string, handler Handler) error {
 	// don't add when it already exist
 	if _, ok := r.sockets[username]; ok {
 		return nil
@@ -93,21 +93,21 @@ func (r *Restartd) AddUser(username string, handler Handler) error {
 	return nil
 }
 
-func (r *Restartd) RemoveUser(user string) {
+func (r *Dispatcher) RemoveUser(user string) {
 	delete(r.sockets, user)
 	os.Remove(r.socketHome + "/" + user)
 }
 
-func (r *Restartd) Stop() {
+func (r *Dispatcher) Stop() {
 	r.bus <- true
 }
 
-func (r *Restartd) Listen() {
+func (r *Dispatcher) Listen() {
 	defer r.Cleanup()
 	<-r.bus
 }
 
-func (r *Restartd) Cleanup() {
+func (r *Dispatcher) Cleanup() {
 	for user, _ := range r.sockets {
 		r.RemoveUser(user)
 	}
