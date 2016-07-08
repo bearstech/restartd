@@ -12,6 +12,7 @@ import (
 type HandlerSystemd struct {
 	// array containing services (names)
 	Services []string
+	user     string
 }
 
 // func Handle
