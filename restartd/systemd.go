@@ -7,9 +7,9 @@ import (
 	"github.com/bearstech/restartd/systemd"
 )
 
-// struct HandlerSystemd
+// struct Handler
 // implements Handler interface
-type HandlerSystemd struct {
+type Handler struct {
 	// array containing services (names)
 	Services []string
 	user     string

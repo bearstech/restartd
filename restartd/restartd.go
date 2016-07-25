@@ -38,7 +38,7 @@ func main() {
 		for _, conf := range confs {
 			err = r.AddUser(conf.User,
 				model.NewProtocolHandler(
-					&HandlerSystemd{Services: conf.Services,
+					&Handler{Services: conf.Services,
 						user: conf.User,
 					}))
 			if err != nil {
