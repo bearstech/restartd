@@ -6,6 +6,11 @@ GOTOOLS = \
 	github.com/axw/gocov/gocov \
 	gopkg.in/matm/v1/gocov-html
 
+GITCOMMIT := $(shell git rev-parse --short HEAD)
+
+LDFLAGS := ${LDFLAGS} \
+	-X main.GITCOMMIT=${GITCOMMIT}
+
 all: restartctl restartd
 
 gopath/src/github.com/bearstech/restartd:
@@ -32,7 +37,7 @@ bin:
 	mkdir -p bin
 
 restartctl: bin gopath deps
-	go build -o bin/restartctl github.com/bearstech/restartd/restartctl/
+	go build -ldflags "${LDFLAGS}" -o bin/restartctl github.com/bearstech/restartd/restartctl/
 
 restartd: bin gopath deps
 	go build -o bin/restartd github.com/bearstech/restartd/restartd/

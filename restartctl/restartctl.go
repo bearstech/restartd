@@ -6,10 +6,32 @@ import (
 	"github.com/bearstech/restartd/protocol"
 	"net"
 	"os"
+	"strings"
 )
 
+var GITCOMMIT, VERSION string
+
 func main() {
-	service := os.Args[1]
+	if len(os.Args) == 1 {
+		return
+	}
+	prems := os.Args[1]
+	if strings.HasPrefix(prems, "-") {
+		switch prems {
+		case "-v":
+			fmt.Printf("Restartcl %s\n", GITCOMMIT)
+		case "-h":
+			fmt.Println(`Restartcl
+
+Try something like:
+
+	restartctl toto start
+			`)
+		}
+		return
+	}
+
+	service := prems
 	command, err := model.ParseCommand(os.Args[2])
 	if err != nil {
 		panic(err)
