@@ -17,7 +17,7 @@ type Handler struct {
 
 // func Handle
 // implemented by Handler interface
-func (h *HandlerSystemd) Handle(m model.Message) (r model.Response) {
+func (h *Handler) Handle(m model.Message) (r model.Response) {
 
 	var code model.Response_Codes
 	var message string
