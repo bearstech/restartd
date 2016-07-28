@@ -1,15 +1,14 @@
-// systemd package
-// use to link restartd to go-systemd using dbus package
+//Package systemd use to link restartd to go-systemd using dbus package
 package systemd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/coreos/go-systemd/dbus"
 	"strings"
 )
 
-// func isUnit()
-// verify that requested unit is declared in a config file
+// IsUnit verify that requested unit is declared in a config file
 func IsUnit(u string, s []string) bool {
 
 	for _, v := range s {
@@ -22,8 +21,7 @@ func IsUnit(u string, s []string) bool {
 
 }
 
-// getStatus
-// Fetch status for a requested unit
+// GetStatus fetch status for a requested unit
 func GetStatus(unitName string) (string, error) {
 
 	var found bool
@@ -89,13 +87,12 @@ func GetStatus(unitName string) (string, error) {
 
 }
 
-// createServiceName
+// CreateServiceName creates service name
 func CreateServiceName(unitName string) string {
 	return fmt.Sprintf("%s.service", unitName)
 }
 
-// loadedStatusMessage
-// create a basic status message (used with loaded units)
+// LoadedStatusMessage creates a basic status message (used with loaded units)
 func LoadedStatusMessage(unit dbus.UnitStatus) string {
 
 	return fmt.Sprintf("Name: %s\n\tDescription: %s\n\tLoad: "+
@@ -104,8 +101,7 @@ func LoadedStatusMessage(unit dbus.UnitStatus) string {
 
 }
 
-// unloadedStatusMessage
-// ceate a basic status message (used with unloaded units)
+// UnloadedStatusMessage creates a basic status message (used with unloaded units)
 func UnloadedStatusMessage(unitFile dbus.UnitFile) string {
 
 	return fmt.Sprintf("Name: %s\n\tStatus: %s\n", unitFile.Path,
@@ -113,7 +109,7 @@ func UnloadedStatusMessage(unitFile dbus.UnitFile) string {
 
 }
 
-// startUnit
+// StartUnit starts unit
 func StartUnit(unitName string) error {
 
 	// concatenante uinitName + .service in a serviceName string
@@ -135,13 +131,15 @@ func StartUnit(unitName string) error {
 	}
 
 	// wait for done signal
-	<-ch
+	msg := <-ch
+	if msg != "done" {
+		return errors.New("Systemd error :" + msg)
+	}
 
-	return err
-
+	return nil
 }
 
-// stopUnit
+// StopUnit stops unit
 func StopUnit(unitName string) error {
 
 	// concatenante uinitName + .service in a serviceName string
@@ -163,12 +161,16 @@ func StopUnit(unitName string) error {
 	}
 
 	// wait for done signal
-	<-ch
+	msg := <-ch
+	if msg != "done" {
+		return errors.New("Systemd error :" + msg)
+	}
 
-	return err
+	return nil
 
 }
 
+// RestartUnit restarts unit
 func RestartUnit(unitName string) error {
 
 	// concatenante uinitName + .service in a serviceName string
@@ -190,12 +192,16 @@ func RestartUnit(unitName string) error {
 	}
 
 	// wait for done signal
-	<-ch
+	msg := <-ch
+	if msg != "done" {
+		return errors.New("Systemd error :" + msg)
+	}
 
-	return err
+	return nil
 
 }
 
+// ReloadUnit reloads unit
 func ReloadUnit(unitName string) error {
 
 	// concatenante uinitName + .service in a serviceName string
@@ -217,8 +223,11 @@ func ReloadUnit(unitName string) error {
 	}
 
 	// wait for done signal
-	<-ch
+	msg := <-ch
+	if msg != "done" {
+		return errors.New("Systemd error :" + msg)
+	}
 
-	return err
+	return nil
 
 }

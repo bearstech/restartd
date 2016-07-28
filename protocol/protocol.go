@@ -15,7 +15,7 @@ func Write(wire io.Writer, msg proto.Message) error {
 	}
 	size := len(txt)
 	if size >= 65536 {
-		return errors.New(fmt.Sprintf("Message is too big : %i >= 65536", size))
+		return fmt.Errorf("Message is too big : %d >= 65536", size)
 	}
 	err = binary.Write(wire, binary.LittleEndian, uint16(size))
 	if err != nil {

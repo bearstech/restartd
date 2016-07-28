@@ -9,7 +9,8 @@ import (
 	"strings"
 )
 
-var GITCOMMIT, VERSION string
+var GITCOMMIT string
+var VERSION string
 
 func main() {
 	if len(os.Args) == 1 {
@@ -44,8 +45,8 @@ Try something like:
 	if socket == "" {
 		socket = "/tmp/restartctl"
 	}
-	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{socket,
-		"unix"})
+	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{Name: socket,
+		Net: "unix"})
 	if err != nil {
 		panic(err)
 	}

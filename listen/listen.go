@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"strconv"
+	"strings"
 )
 
 type Handler interface {
@@ -37,9 +38,9 @@ type Dispatcher struct {
 
 func New(socketHome string) *Dispatcher {
 	r := Dispatcher{
-		socketHome,
-		make(map[string]channel),
-		make(chan bool),
+		socketHome: socketHome,
+		sockets:    make(map[string]channel),
+		bus:        make(chan bool),
 	}
 	return &r
 }
@@ -55,12 +56,23 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 		return err
 	}
 
-	os.Remove(r.socketHome + "/" + username)
-
 	// socket path
 	sp := r.socketHome + "/" + username
 
-	l, err := net.ListenUnix("unix", &net.UnixAddr{sp, "unix"})
+	fm, err := os.Stat(sp)
+	fmt.Println("Adduser fm ", fm, err)
+	if err != nil && !strings.HasSuffix(err.Error(), ": no such file or directory") {
+		return err
+	}
+	if fm != nil {
+		err = os.Remove(sp)
+		if err != nil {
+			fmt.Println("Adduser error: ", err)
+			return err
+		}
+	}
+
+	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: sp, Net: "unix"})
 	if err != nil {
 		return err
 	}
@@ -93,9 +105,9 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 	return nil
 }
 
-func (r *Dispatcher) RemoveUser(user string) {
+func (r *Dispatcher) RemoveUser(user string) error {
 	delete(r.sockets, user)
-	os.Remove(r.socketHome + "/" + user)
+	return os.Remove(r.socketHome + "/" + user)
 }
 
 func (r *Dispatcher) Stop() {
@@ -107,11 +119,15 @@ func (r *Dispatcher) Listen() {
 	<-r.bus
 }
 
-func (r *Dispatcher) Cleanup() {
-	for user, _ := range r.sockets {
-		r.RemoveUser(user)
+func (r *Dispatcher) Cleanup() error {
+	for user := range r.sockets {
+		err := r.RemoveUser(user)
+		if err != nil {
+			return err
+		}
 	}
 	fmt.Println("bye")
+	return nil
 }
 
 type Echo struct {

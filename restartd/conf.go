@@ -18,14 +18,14 @@ func ReadConf(raw []byte, conf *Conf) error {
 	return err
 }
 
-func ReadConfFolder(conf_folder string) ([]*Conf, error) {
-	conf_paths, err := filepath.Glob(filepath.Join(conf_folder, "*.yml"))
+func ReadConfFolder(confFolder string) ([]*Conf, error) {
+	confPaths, err := filepath.Glob(filepath.Join(confFolder, "*.yml"))
 	if err != nil {
 		return nil, err
 	}
-	confs := make([]*Conf, len(conf_paths))
-	for n, conf_path := range conf_paths {
-		file, err := os.Open(conf_path)
+	confs := make([]*Conf, len(confPaths))
+	for n, confPath := range confPaths {
+		file, err := os.Open(confPath)
 		if err != nil {
 			return nil, err
 		}

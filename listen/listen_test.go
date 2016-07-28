@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"os/user"
+	"strings"
 	"testing"
 )
 
@@ -23,7 +24,10 @@ func TestListener(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	os.Mkdir("/tmp/test_restartd", fm.Mode())
+	err = os.Mkdir("/tmp/test_restartd", fm.Mode())
+	if err != nil && !strings.HasSuffix(err.Error(), ": file exists") {
+		t.Error(err)
+	}
 	//defer os.Remove("/tmp/test_restartd")
 	me, err := user.Current()
 	if err != nil {
@@ -37,8 +41,8 @@ func TestListener(t *testing.T) {
 		t.Error(err)
 	}
 	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{
-		"/tmp/test_restartd/" + me.Username,
-		"unix"})
+		Name: "/tmp/test_restartd/" + me.Username,
+		Net:  "unix"})
 	if err != nil {
 		t.Error(err)
 	}

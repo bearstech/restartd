@@ -19,20 +19,20 @@ func main() {
 	r := listen.New(fldr)
 	defer r.Cleanup()
 
-	conf_folder := os.Getenv("RESTARTD_CONF")
+	confFolder := os.Getenv("RESTARTD_CONF")
 
-	if conf_folder == "" {
-		conf_folder = "/etc/restartd/conf.d"
+	if confFolder == "" {
+		confFolder = "/etc/restartd/conf.d"
 	}
-	log.Info("Conf folder is ", conf_folder)
+	log.Info("Conf folder is ", confFolder)
 
 	configs := func() {
-		confs, err := ReadConfFolder(conf_folder)
+		confs, err := ReadConfFolder(confFolder)
 		if err != nil {
 			panic(err)
 		}
 		if len(confs) == 0 {
-			log.Error("No conf found. Add some yml file in " + conf_folder)
+			log.Error("No conf found. Add some yml file in " + confFolder)
 			//os.Exit(-1)
 		}
 		for _, conf := range confs {
