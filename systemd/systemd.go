@@ -105,27 +105,23 @@ func UnloadedStatusMessage(unitFile dbus.UnitFile) string {
 
 }
 
-// StartUnit starts unit
-func StartUnit(unitName string) error {
-
+func dbusConn(unitName string, closure func(serviceName string, conn *dbus.Conn, ch chan string) error) error {
 	// concatenante uinitName + .service in a serviceName string
 	serviceName := CreateServiceName(unitName)
 
 	ch := make(chan string)
-
 	// create systemd-dbus conn
 	conn, err := dbus.New()
 	// ensure conn is closed
-	defer conn.Close()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = conn.StartUnit(serviceName, "replace", ch)
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 
+	err = closure(serviceName, conn, ch)
+	if err != nil {
+		return err
+	}
 	// wait for done signal
 	msg := <-ch
 	if msg != DONE {
@@ -133,97 +129,36 @@ func StartUnit(unitName string) error {
 	}
 
 	return nil
+}
+
+// StartUnit starts unit
+func StartUnit(unitName string) error {
+	return dbusConn(unitName, func(serviceName string, conn *dbus.Conn, ch chan string) error {
+		_, err := conn.StartUnit(serviceName, "replace", ch)
+		return err
+	})
 }
 
 // StopUnit stops unit
 func StopUnit(unitName string) error {
-
-	// concatenante uinitName + .service in a serviceName string
-	serviceName := CreateServiceName(unitName)
-
-	ch := make(chan string)
-
-	// create systemd-dbus conn
-	conn, err := dbus.New()
-	// ensure conn is closed
-	defer conn.Close()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = conn.StopUnit(serviceName, "replace", ch)
-	if err != nil {
+	return dbusConn(unitName, func(serviceName string, conn *dbus.Conn, ch chan string) error {
+		_, err := conn.StopUnit(serviceName, "replace", ch)
 		return err
-	}
-
-	// wait for done signal
-	msg := <-ch
-	if msg != DONE {
-		return errors.New("Systemd error :" + msg)
-	}
-
-	return nil
-
+	})
 }
 
 // RestartUnit restarts unit
 func RestartUnit(unitName string) error {
-
-	// concatenante uinitName + .service in a serviceName string
-	serviceName := CreateServiceName(unitName)
-
-	ch := make(chan string)
-
-	// create systemd-dbus conn
-	conn, err := dbus.New()
-	// ensure conn is closed
-	defer conn.Close()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = conn.RestartUnit(serviceName, "replace", ch)
-	if err != nil {
+	return dbusConn(unitName, func(serviceName string, conn *dbus.Conn, ch chan string) error {
+		_, err := conn.RestartUnit(serviceName, "replace", ch)
 		return err
-	}
-
-	// wait for done signal
-	msg := <-ch
-	if msg != DONE {
-		return errors.New("Systemd error :" + msg)
-	}
-
-	return nil
-
+	})
 }
 
 // ReloadUnit reloads unit
 func ReloadUnit(unitName string) error {
-
-	// concatenante uinitName + .service in a serviceName string
-	serviceName := CreateServiceName(unitName)
-
-	ch := make(chan string)
-
-	// create systemd-dbus conn
-	conn, err := dbus.New()
-	// ensure conn is closed
-	defer conn.Close()
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = conn.ReloadUnit(serviceName, "replace", ch)
-	if err != nil {
+	return dbusConn(unitName, func(serviceName string, conn *dbus.Conn, ch chan string) error {
+		_, err := conn.ReloadUnit(serviceName, "replace", ch)
 		return err
-	}
-
-	// wait for done signal
-	msg := <-ch
-	if msg != DONE {
-		return errors.New("Systemd error :" + msg)
-	}
-
-	return nil
-
+	})
 }
