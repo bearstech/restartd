@@ -24,8 +24,6 @@ func IsUnit(u string, s []string) bool {
 // GetStatus fetch status for a requested unit
 func GetStatus(unitName string) (string, error) {
 
-	var found bool
-
 	// concatenante uinitName + .service in a serviceName string
 	serviceName := CreateServiceName(unitName)
 
@@ -48,7 +46,7 @@ func GetStatus(unitName string) (string, error) {
 
 	// for each units, find the requested one
 	for _, v := range unitsStatus {
-		if strings.Contains(v.Name, serviceName) == true {
+		if strings.Contains(v.Name, serviceName) {
 			// create basic response message
 			message := LoadedStatusMessage(v)
 
@@ -67,13 +65,9 @@ func GetStatus(unitName string) (string, error) {
 
 	// search for unit
 	for _, v := range unitsFiles {
-
-		found = strings.Contains(v.Path, serviceName)
-
-		if found == true {
+		if strings.Contains(v.Path, serviceName) {
 			// create basic response message
 			message := UnloadedStatusMessage(v)
-
 			// return message to stopctl client
 			return message, err
 		}
