@@ -22,6 +22,12 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 	var code model.Response_Codes
 	var message string
 
+	if m.GetService() == "--all" {
+		if m.GetCommand() == model.Message_status {
+			//FIXME find all services
+		}
+	}
+
 	// verify if requested unit exists
 	ret := systemd.IsUnit(m.GetService(), h.Services)
 

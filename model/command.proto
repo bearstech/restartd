@@ -33,4 +33,15 @@ message Response {
     }
     required Codes Code = 1;
     optional string Message = 2;
+
+    message Statuz {
+        required string Service = 1;
+        enum Codes {
+            started = 0;
+            stopped  = 1;
+            failed   = 2;
+        }
+        required Codes Code = 2;
+    }
+    repeated Statuz Status = 3;
 }

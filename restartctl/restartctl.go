@@ -54,11 +54,26 @@ func main() {
 			Name:  "Version, V",
 			Usage: "Version",
 		},
+		cli.BoolFlag{
+			Name:  "status-all",
+			Usage: "All status",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
 		if c.Bool("V") {
 			fmt.Printf("Restartcl CLI git:%s\n", GITCOMMIT)
+			return nil
+		}
+		if c.Bool("status-all") {
+			service := "--all"
+			command := model.Message_status
+			response, err := ask(&service, &command)
+			if err != nil {
+				return err
+			}
+			//FIXME display blabla
+			fmt.Println(response)
 			return nil
 		}
 		if c.NArg() == 0 {
