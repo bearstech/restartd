@@ -7,6 +7,15 @@ import (
 	"github.com/bearstech/restartd/systemd"
 )
 
+type Error struct {
+	message string
+	code    model.Response_Codes
+}
+
+func (e *Error) Error() string { // implements error
+	return e.message
+}
+
 // struct Handler
 // implements Handler interface
 type Handler struct {
