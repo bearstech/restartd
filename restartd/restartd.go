@@ -13,7 +13,7 @@ import (
 var GITCOMMIT string
 
 func main() {
-	if len(os.Args) > 0 {
+	if len(os.Args) > 1 {
 		if os.Args[1] == "-V" {
 			fmt.Printf("Restartd daemon git:%s\n", GITCOMMIT)
 			return
