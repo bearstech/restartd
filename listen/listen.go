@@ -44,19 +44,48 @@ func New(socketHome string) *Dispatcher {
 	return &r
 }
 
-func (r *Dispatcher) socket(uzer *user.User) (*net.UnixListener, error) {
-	// socket dir
-	sd := r.socketHome + "/" + uzer.Username
-	_, err := os.Stat(sd)
+func uidgid(uzer *user.User) (uid int, guid int, err error) {
+	// get uid user value as int
+	uid, err = strconv.Atoi(uzer.Uid)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	// get gid user value as int
+	gid, err := strconv.Atoi(uzer.Gid)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return uid, gid, nil
+}
+
+func mkdirp(path string, perm os.FileMode) error {
+	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		err = os.MkdirAll(sd, 0644)
+		err = os.MkdirAll(path, perm)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	} else {
 		if err != nil {
-			return nil, err
+			return err
 		}
+	}
+	return nil
+}
+
+func buildSocket(home string, uzer *user.User) (*net.UnixListener, error) {
+	uid, gid, err := uidgid(uzer)
+	if err != nil {
+		return nil, err
+	}
+
+	// socket dir
+	sd := home + "/" + uzer.Username
+	err = mkdirp(sd, 0644)
+	if err != nil {
+		return nil, err
 	}
 
 	sp := sd + "/" + "restartctl.sock"
@@ -71,18 +100,6 @@ func (r *Dispatcher) socket(uzer *user.User) (*net.UnixListener, error) {
 	}
 
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: sp, Net: "unix"})
-	if err != nil {
-		return nil, err
-	}
-
-	// get uid user value as int
-	uid, err := strconv.Atoi(uzer.Uid)
-	if err != nil {
-		return nil, err
-	}
-
-	// get gid user value as int
-	gid, err := strconv.Atoi(uzer.Gid)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +129,7 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 		return err
 	}
 
-	l, err := r.socket(uzer)
+	l, err := buildSocket(r.socketHome, uzer)
 	if err != nil {
 		return err
 	}
