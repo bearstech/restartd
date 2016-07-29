@@ -33,7 +33,10 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 
 	if m.GetService() == "--all" {
 		if m.GetCommand() == model.Message_status {
-			//FIXME find all services
+			for service := range h.Services {
+				//FIXME find all service status
+				fmt.Println(service)
+			}
 		}
 	}
 
