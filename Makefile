@@ -29,9 +29,12 @@ gopath/src/github.com/coreos/go-systemd/dbus:
 gopath/src/github.com/golang/protobuf/proto:
 	go get github.com/golang/protobuf/proto
 
+gopath/src/github.com/urfave/cli:
+	go get github.com/urfave/cli
+
 gopath: gopath/src/github.com/bearstech/restartd
 
-deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus gopath/src/github.com/golang/protobuf/proto gopath/src/github.com/coreos/go-systemd/dbus
+deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus gopath/src/github.com/golang/protobuf/proto gopath/src/github.com/coreos/go-systemd/dbus gopath/src/github.com/urfave/cli
 
 bin:
 	mkdir -p bin
