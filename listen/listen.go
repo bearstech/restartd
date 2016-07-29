@@ -44,28 +44,18 @@ func New(socketHome string) *Dispatcher {
 	return &r
 }
 
-func (r *Dispatcher) AddUser(username string, handler Handler) error {
-	// don't add when it already exist
-	if _, ok := r.sockets[username]; ok {
-		return nil
-	}
-	// verify the user exists on the system
-	User, err := user.Lookup(username)
-	if err != nil {
-		return err
-	}
-
+func (r *Dispatcher) socket(uzer *user.User) (*net.UnixListener, error) {
 	// socket dir
-	sd := r.socketHome + "/" + username
-	_, err = os.Stat(sd)
+	sd := r.socketHome + "/" + uzer.Username
+	_, err := os.Stat(sd)
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(sd, 0644)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	} else {
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -73,42 +63,59 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 
 	_, err = os.Stat(sp)
 	if err != nil && !os.IsNotExist(err) {
-		return err
-	} else {
-		err = os.Remove(sp)
-		if err == nil {
-			return err
-		}
+		return nil, err
+	}
+	err = os.Remove(sp)
+	if err == nil {
+		return nil, err
 	}
 
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: sp, Net: "unix"})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// get uid user value as int
-	uid, err := strconv.Atoi(User.Uid)
+	uid, err := strconv.Atoi(uzer.Uid)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// get gid user value as int
-	gid, err := strconv.Atoi(User.Gid)
+	gid, err := strconv.Atoi(uzer.Gid)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// change socket ownsership to username
 	err = os.Chown(sd, uid, gid)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = os.Chown(sp, uid, gid)
 	if err != nil {
+		return nil, err
+	}
+	return l, nil
+
+}
+
+func (r *Dispatcher) AddUser(username string, handler Handler) error {
+	// don't add when it already exist
+	if _, ok := r.sockets[username]; ok {
+		return nil
+	}
+	// verify the user exists on the system
+	uzer, err := user.Lookup(username)
+	if err != nil {
 		return err
 	}
 
+	l, err := r.socket(uzer)
+	if err != nil {
+		return err
+	}
 	c := channel{
 		username,
 		l,
