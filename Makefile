@@ -40,7 +40,7 @@ bin:
 	mkdir -p bin
 
 restartctl: bin gopath deps
-	go build -ldflags "${LDFLAGS}" -o bin/restartctl github.com/bearstech/restartd/restartctl/
+	go build -ldflags "${LDFLAGS}" -o bin/restartctl github.com/bearstech/restartd/cli/restartctl/
 
 restartd: bin gopath deps
 	go build -ldflags "${LDFLAGS}" -o bin/restartd github.com/bearstech/restartd/cli/restartd/
