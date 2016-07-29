@@ -43,7 +43,7 @@ restartctl: bin gopath deps
 	go build -ldflags "${LDFLAGS}" -o bin/restartctl github.com/bearstech/restartd/restartctl/
 
 restartd: bin gopath deps
-	go build -ldflags "${LDFLAGS}" -o bin/restartd github.com/bearstech/restartd/restartd/
+	go build -ldflags "${LDFLAGS}" -o bin/restartd github.com/bearstech/restartd/cli/restartd/
 
 test: gopath/src/github.com/bearstech/restartd deps
 	go test github.com/bearstech/restartd/listen/
