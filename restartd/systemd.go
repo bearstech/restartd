@@ -1,4 +1,4 @@
-package main
+package restartd
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 type Handler struct {
 	// array containing services (names)
 	Services []string
-	user     string
+	User     string
 }
 
 // func Handle

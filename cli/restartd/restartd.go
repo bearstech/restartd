@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/restartd/listen"
 	"github.com/bearstech/restartd/model"
+	"github.com/bearstech/restartd/restartd"
 	"github.com/urfave/cli"
 	"os"
 	"os/signal"
@@ -60,7 +61,7 @@ func main() {
 		log.Info("Conf folder is ", confFolder)
 
 		configs := func() {
-			confs, err := ReadConfFolder(confFolder)
+			confs, err := restartd.ReadConfFolder(confFolder)
 			if err != nil {
 				panic(err)
 			}
@@ -71,8 +72,8 @@ func main() {
 			for _, conf := range confs {
 				err = r.AddUser(conf.User,
 					model.NewProtocolHandler(
-						&Handler{Services: conf.Services,
-							user: conf.User,
+						&restartd.Handler{Services: conf.Services,
+							User: conf.User,
 						}))
 				if err != nil {
 					panic(err)
