@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const DONE = "done"
+
 // IsUnit verify that requested unit is declared in a config file
 func IsUnit(u string, s []string) bool {
 
@@ -126,7 +128,7 @@ func StartUnit(unitName string) error {
 
 	// wait for done signal
 	msg := <-ch
-	if msg != "done" {
+	if msg != DONE {
 		return errors.New("Systemd error :" + msg)
 	}
 
@@ -156,7 +158,7 @@ func StopUnit(unitName string) error {
 
 	// wait for done signal
 	msg := <-ch
-	if msg != "done" {
+	if msg != DONE {
 		return errors.New("Systemd error :" + msg)
 	}
 
@@ -187,7 +189,7 @@ func RestartUnit(unitName string) error {
 
 	// wait for done signal
 	msg := <-ch
-	if msg != "done" {
+	if msg != DONE {
 		return errors.New("Systemd error :" + msg)
 	}
 
@@ -218,7 +220,7 @@ func ReloadUnit(unitName string) error {
 
 	// wait for done signal
 	msg := <-ch
-	if msg != "done" {
+	if msg != DONE {
 		return errors.New("Systemd error :" + msg)
 	}
 
