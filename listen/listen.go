@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/user"
 	"strconv"
-	"strings"
 )
 
 type Handler interface {
@@ -58,13 +57,13 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 
 	// socket dir
 	sd := r.socketHome + "/" + username
-	fi, err := os.Stat(sd)
-	if err != nil && !strings.HasSuffix(err.Error(), ": no such file or directory") {
-		return err
-	}
-
-	if fi == nil {
-		err = os.Mkdir(sd, 0644)
+	_, err = os.Stat(sd)
+	if os.IsNotExist(err) {
+		err = os.MkdirAll(sd, 0644)
+		if err != nil {
+			return err
+		}
+	} else {
 		if err != nil {
 			return err
 		}
@@ -72,15 +71,12 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 
 	sp := sd + "/" + "restartctl.sock"
 
-	fm, err := os.Stat(sp)
-	fmt.Println("Adduser fm ", fm, err)
-	if err != nil && !strings.HasSuffix(err.Error(), ": no such file or directory") {
+	_, err = os.Stat(sp)
+	if err != nil && !os.IsNotExist(err) {
 		return err
-	}
-	if fm != nil {
+	} else {
 		err = os.Remove(sp)
 		if err == nil {
-			fmt.Println("Adduser error: ", err)
 			return err
 		}
 	}
