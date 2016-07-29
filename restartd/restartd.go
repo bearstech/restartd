@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/restartd/listen"
 	"github.com/bearstech/restartd/model"
@@ -9,7 +10,15 @@ import (
 	"syscall"
 )
 
+var GITCOMMIT string
+
 func main() {
+	if len(os.Args) > 0 {
+		if os.Args[1] == "-V" {
+			fmt.Printf("Restartd daemon git:%s\n", GITCOMMIT)
+			return
+		}
+	}
 	fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
 	if fldr == "" {
 		fldr = "/tmp/"

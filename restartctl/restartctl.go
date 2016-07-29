@@ -19,8 +19,8 @@ func main() {
 	prems := os.Args[1]
 	if strings.HasPrefix(prems, "-") {
 		switch prems {
-		case "-v":
-			fmt.Printf("Restartcl %s\n", GITCOMMIT)
+		case "-V":
+			fmt.Printf("Restartcl CLI git:%s\n", GITCOMMIT)
 		case "-h":
 			fmt.Println(`Restartcl
 
