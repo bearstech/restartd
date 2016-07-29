@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
@@ -33,7 +34,18 @@ func main() {
 
 		fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
 		if fldr == "" {
-			fldr = "/tmp/"
+			fldr = "/tmp/restartd"
+			fi, err := os.Stat(fldr)
+			if err != nil && !strings.HasSuffix(err.Error(), ": no such file or directory") {
+				panic(err)
+			}
+
+			if fi == nil {
+				err = os.Mkdir(fldr, 0644)
+				if err != nil {
+					panic(err)
+				}
+			}
 		}
 		log.Info("Socket folder is ", fldr)
 

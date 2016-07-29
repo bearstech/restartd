@@ -56,8 +56,21 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 		return err
 	}
 
-	// socket path
-	sp := r.socketHome + "/" + username
+	// socket dir
+	sd := r.socketHome + "/" + username
+	fi, err := os.Stat(sd)
+	if err != nil && !strings.HasSuffix(err.Error(), ": no such file or directory") {
+		return err
+	}
+
+	if fi == nil {
+		err = os.Mkdir(sd, 0644)
+		if err != nil {
+			return err
+		}
+	}
+
+	sp := sd + "/" + "restartctl.sock"
 
 	fm, err := os.Stat(sp)
 	fmt.Println("Adduser fm ", fm, err)
@@ -66,7 +79,7 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 	}
 	if fm != nil {
 		err = os.Remove(sp)
-		if err != nil {
+		if err == nil {
 			fmt.Println("Adduser error: ", err)
 			return err
 		}
@@ -90,6 +103,11 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 	}
 
 	// change socket ownsership to username
+	err = os.Chown(sd, uid, gid)
+	if err != nil {
+		return err
+	}
+
 	err = os.Chown(sp, uid, gid)
 	if err != nil {
 		return err

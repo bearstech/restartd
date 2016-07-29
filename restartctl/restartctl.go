@@ -48,7 +48,7 @@ func main() {
 
 		socket := os.Getenv("RESTARTCTL_SOCKET")
 		if socket == "" {
-			socket = "/tmp/restartctl"
+			socket = "/tmp/restartctl.sock"
 		}
 		conn, err := net.DialUnix("unix", nil, &net.UnixAddr{Name: socket,
 			Net: "unix"})
