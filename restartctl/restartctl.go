@@ -13,6 +13,35 @@ import (
 var GITCOMMIT string
 var VERSION string
 
+func ask(service *string, command *model.Message_Commands) (response *model.Response, err error) {
+
+	socket := os.Getenv("RESTARTCTL_SOCKET")
+	if socket == "" {
+		socket = "/tmp/restartctl.sock"
+	}
+	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{Name: socket,
+		Net: "unix"})
+	if err != nil {
+		return nil, err
+	}
+
+	msg := model.Message{
+		Service: service,
+		Command: command,
+	}
+	err = protocol.Write(conn, &msg)
+	if err != nil {
+		return nil, err
+	}
+
+	err = protocol.Read(conn, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
 func main() {
 
 	app := cli.NewApp()
@@ -45,32 +74,10 @@ func main() {
 		if err != nil {
 			return err
 		}
-
-		socket := os.Getenv("RESTARTCTL_SOCKET")
-		if socket == "" {
-			socket = "/tmp/restartctl.sock"
-		}
-		conn, err := net.DialUnix("unix", nil, &net.UnixAddr{Name: socket,
-			Net: "unix"})
+		response, err := ask(&service, &command)
 		if err != nil {
 			return err
 		}
-
-		msg := model.Message{
-			Service: &service,
-			Command: &command,
-		}
-		err = protocol.Write(conn, &msg)
-		if err != nil {
-			return err
-		}
-
-		var response model.Response
-		err = protocol.Read(conn, &response)
-		if err != nil {
-			return err
-		}
-
 		fmt.Println(*response.Code, ":", *response.Message)
 		return nil
 	}
