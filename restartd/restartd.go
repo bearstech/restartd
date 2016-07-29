@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/restartd/listen"
 	"github.com/bearstech/restartd/model"
+	"github.com/urfave/cli"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,68 +14,85 @@ import (
 var GITCOMMIT string
 
 func main() {
-	if len(os.Args) > 1 {
-		if os.Args[1] == "-V" {
+
+	app := cli.NewApp()
+	app.Version = "git:" + GITCOMMIT
+
+	app.Flags = []cli.Flag{
+		cli.BoolFlag{
+			Name:  "Version, V",
+			Usage: "Version",
+		},
+	}
+
+	app.Action = func(c *cli.Context) error {
+		if c.Bool("V") {
 			fmt.Printf("Restartd daemon git:%s\n", GITCOMMIT)
-			return
+			return nil
 		}
-	}
-	fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
-	if fldr == "" {
-		fldr = "/tmp/"
-	}
-	log.Info("Socket folder is ", fldr)
 
-	r := listen.New(fldr)
-	defer r.Cleanup()
-
-	confFolder := os.Getenv("RESTARTD_CONF")
-
-	if confFolder == "" {
-		confFolder = "/etc/restartd/conf.d"
-	}
-	log.Info("Conf folder is ", confFolder)
-
-	configs := func() {
-		confs, err := ReadConfFolder(confFolder)
-		if err != nil {
-			panic(err)
+		fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
+		if fldr == "" {
+			fldr = "/tmp/"
 		}
-		if len(confs) == 0 {
-			log.Error("No conf found. Add some yml file in " + confFolder)
-			//os.Exit(-1)
+		log.Info("Socket folder is ", fldr)
+
+		r := listen.New(fldr)
+		defer r.Cleanup()
+
+		confFolder := os.Getenv("RESTARTD_CONF")
+
+		if confFolder == "" {
+			confFolder = "/etc/restartd/conf.d"
 		}
-		for _, conf := range confs {
-			err = r.AddUser(conf.User,
-				model.NewProtocolHandler(
-					&Handler{Services: conf.Services,
-						user: conf.User,
-					}))
+		log.Info("Conf folder is ", confFolder)
+
+		configs := func() {
+			confs, err := ReadConfFolder(confFolder)
 			if err != nil {
 				panic(err)
 			}
-			log.Info("Add user ", conf.User)
-		}
-		log.Info("Number of users : ", len(confs))
-	}
-	// initial config
-	configs()
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1)
-	go func() {
-		for {
-			s := <-c
-			log.Info("Signal : ", s)
-			switch s {
-			case os.Interrupt:
-				r.Stop()
-			case syscall.SIGHUP:
-				configs()
+			if len(confs) == 0 {
+				log.Error("No conf found. Add some yml file in " + confFolder)
+				//os.Exit(-1)
 			}
+			for _, conf := range confs {
+				err = r.AddUser(conf.User,
+					model.NewProtocolHandler(
+						&Handler{Services: conf.Services,
+							user: conf.User,
+						}))
+				if err != nil {
+					panic(err)
+				}
+				log.Info("Add user ", conf.User)
+			}
+			log.Info("Number of users : ", len(confs))
 		}
-	}()
+		// initial config
+		configs()
 
-	// listen and block
-	r.Listen()
+		cc := make(chan os.Signal, 1)
+		signal.Notify(cc, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1)
+		go func() {
+			for {
+				s := <-cc
+				log.Info("Signal : ", s)
+				switch s {
+				case os.Interrupt:
+					r.Stop()
+				case syscall.SIGHUP:
+					configs()
+				}
+			}
+		}()
+
+		// listen and block
+		r.Listen()
+		return nil
+	}
+	err := app.Run(os.Args)
+	if err != nil {
+		os.Exit(-1)
+	}
 }
