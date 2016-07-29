@@ -47,7 +47,6 @@ restartd: bin gopath deps
 
 test: gopath/src/github.com/bearstech/restartd deps
 	go test github.com/bearstech/restartd/listen/
-	go test github.com/bearstech/restartd/restartctl/
 	go test github.com/bearstech/restartd/protocol/
 	go test github.com/bearstech/restartd/restartd/
 	go test github.com/bearstech/restartd/model/
