@@ -41,7 +41,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 	}
 
 	// verify if requested unit exists
-	ret := systemd.IsUnit(m.GetService(), h.Services)
+	ret := systemd.Contains(m.GetService(), h.Services)
 
 	// if unit does not exists
 	if ret != true {

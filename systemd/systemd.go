@@ -10,17 +10,14 @@ import (
 
 const DONE = "done"
 
-// IsUnit verify that requested unit is declared in a config file
-func IsUnit(u string, s []string) bool {
-
-	for _, v := range s {
-		if v == u {
+// Contains verify that requested unit is declared in a config file
+func Contains(needle string, haystack []string) bool {
+	for _, v := range haystack {
+		if v == needle {
 			return true
 		}
 	}
-
 	return false
-
 }
 
 // GetStatus fetch status for a requested unit
