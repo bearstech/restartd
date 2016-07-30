@@ -8,7 +8,39 @@ import (
 	"strings"
 )
 
-const DONE = "done"
+const (
+	DONE = "done"
+)
+
+type SubState string
+
+const (
+	SUBSTATE_ACTIVE    SubState = "active"
+	SUBSTATE_DEAD      SubState = "dead"
+	SUBSTATE_EXITED    SubState = "exited"
+	SUBSTATE_FAILED    SubState = "failed"
+	SUBSTATE_LISTENING SubState = "listening"
+	SUBSTATE_MOUNTED   SubState = "mounted"
+	SUBSTATE_PLUGGED   SubState = "plugged"
+	SUBSTATE_RUNNING   SubState = "running"
+	SUBSTATE_WAITING   SubState = "waiting"
+)
+
+type ActiveState string
+
+const (
+	ACTIVESTATE_ACTIVE   ActiveState = "active"
+	ACTIVESTATE_FAILED   ActiveState = "failed"
+	ACTIVESTATE_INACTIVE ActiveState = "inactive"
+)
+
+type LoadState string
+
+const (
+	LOADSTATE_LOADED    LoadState = "loaded"
+	LOADSTATE_MASKED    LoadState = "masked"
+	LOADSTATE_NOT_FOUND LoadState = "not-found"
+)
 
 // Contains verify that requested unit is declared in a config file
 func Contains(needle string, haystack []string) bool {
