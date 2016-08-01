@@ -95,6 +95,8 @@ func main() {
 				switch s {
 				case os.Interrupt:
 					r.Stop()
+				case syscall.SIGTERM:
+					r.Stop()
 				case syscall.SIGHUP:
 					configs()
 				}
