@@ -43,3 +43,22 @@ func TestMessage(t *testing.T) {
 		t.Error("Read trouble : ", err)
 	}
 }
+
+func TestResponse(t *testing.T) {
+	success := Response_success
+	r := Response{
+		Code: &success,
+	}
+	network := new(bytes.Buffer) // Stand-in for the network.
+	err := protocol.Write(network, &r)
+	if err != nil {
+		t.Error("Write trouble : ", err)
+	}
+	s := network.String()
+	t.Log("Wire : ", len(s), s)
+	var r2 Response
+	err = protocol.Read(network, &r2)
+	if err != nil {
+		t.Error("Read trouble : ", err)
+	}
+}
