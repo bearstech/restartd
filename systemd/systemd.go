@@ -42,6 +42,12 @@ const (
 	LOADSTATE_NOT_FOUND LoadState = "not-found"
 )
 
+type State struct {
+	Active ActiveState
+	Load   LoadState
+	Sub    SubState
+}
+
 // Contains verify that requested unit is declared in a config file
 func Contains(needle string, haystack []string) bool {
 	for _, v := range haystack {
@@ -50,6 +56,29 @@ func Contains(needle string, haystack []string) bool {
 		}
 	}
 	return false
+}
+
+func GetAllStatus(unitNames []string) error {
+	serviceNames := make([]string, len(unitNames))
+	for i, n := range unitNames {
+		serviceNames[i] = CreateServiceName(n)
+	}
+
+	// create systemd-dbus conn
+	conn, err := dbus.New()
+	// ensure conn is closed
+	defer conn.Close()
+	if err != nil {
+		return err
+	}
+
+	//unitsStatus, err := conn.ListUnits()
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 // GetStatus fetch status for a requested unit
