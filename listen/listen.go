@@ -154,7 +154,7 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 
 func (r *Dispatcher) RemoveUser(user string) error {
 	delete(r.sockets, user)
-	return os.Remove(r.socketHome + "/" + user)
+	return os.Remove(r.socketHome + "/" + user + "/" + "restartctl.sock")
 }
 
 func (r *Dispatcher) Stop() {
