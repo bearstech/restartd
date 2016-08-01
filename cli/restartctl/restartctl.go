@@ -34,6 +34,7 @@ func ask(service *string, command *model.Message_Commands) (response *model.Resp
 		return nil, err
 	}
 
+	response = &model.Response{}
 	err = protocol.Read(conn, response)
 	if err != nil {
 		return nil, err
