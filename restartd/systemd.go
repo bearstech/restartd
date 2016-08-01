@@ -20,8 +20,9 @@ func (e *Error) Error() string { // implements error
 // implements Handler interface
 type Handler struct {
 	// array containing services (names)
-	Services []string
-	User     string
+	Services      []string
+	User          string
+	PrefixService bool
 }
 
 // func Handle
@@ -40,15 +41,20 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 		}
 	}
 
+	service := m.GetService()
+	if h.PrefixService { // alice asks for web, but it's alice-web
+		service = fmt.Sprintf("%s-%s", h.User, service)
+	}
+
 	// verify if requested unit exists
-	ret := systemd.Contains(m.GetService(), h.Services)
+	ret := systemd.Contains(service, h.Services)
 
 	// if unit does not exists
 	if ret != true {
 		// write appropriate message
 		code = model.Response_err_missing
 		message = fmt.Sprintf("Service %s does not exists",
-			m.GetService())
+			service)
 	} else {
 
 		// switch between all supported commands
@@ -56,13 +62,13 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 
 		case model.Message_status:
 			// Get status for requested unit
-			ret, err := systemd.GetStatus(m.GetService())
+			ret, err := systemd.GetStatus(service)
 
 			// error checking
 			// write appropriate messages
 			if err != nil {
 				message = fmt.Sprintf("Error getting %s service status",
-					m.GetService())
+					service)
 				code = model.Response_err_status
 				log.Error(message)
 			} else {
@@ -74,7 +80,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 
 		case model.Message_start:
 			// start unit
-			err := systemd.StartUnit(m.GetService())
+			err := systemd.StartUnit(service)
 
 			// error checking
 			if err != nil {
@@ -83,7 +89,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 				code = model.Response_err_start
 			} else {
 				message = fmt.Sprintf("%s service is started",
-					m.GetService())
+					service)
 				code = model.Response_suc_start
 			}
 
@@ -91,7 +97,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 
 		case model.Message_stop:
 			// stop unit
-			err := systemd.StopUnit(m.GetService())
+			err := systemd.StopUnit(service)
 
 			// error checking
 			if err != nil {
@@ -100,7 +106,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 				code = model.Response_err_stop
 			} else {
 				message = fmt.Sprintf("%s service is stopped",
-					m.GetService())
+					service)
 				code = model.Response_suc_stop
 			}
 
@@ -108,7 +114,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 
 		case model.Message_restart:
 			// restart unit
-			err := systemd.RestartUnit(m.GetService())
+			err := systemd.RestartUnit(service)
 
 			// error checking
 			if err != nil {
@@ -117,7 +123,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 				code = model.Response_err_restart
 			} else {
 				message = fmt.Sprintf("%s service is restarted",
-					m.GetService())
+					service)
 				code = model.Response_suc_restart
 			}
 
@@ -125,16 +131,16 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 
 		case model.Message_reload:
 			// reload unit
-			err := systemd.ReloadUnit(m.GetService())
+			err := systemd.ReloadUnit(service)
 
 			// error checking
 			if err != nil {
 				message = fmt.Sprintf("Error reloading %s service",
-					m.GetService())
+					service)
 				code = model.Response_err_restart
 			} else {
 				message = fmt.Sprintf("%s service is reloaded",
-					m.GetService())
+					service)
 				code = model.Response_suc_restart
 			}
 
