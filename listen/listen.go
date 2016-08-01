@@ -31,14 +31,14 @@ func (c *channel) listen() {
 
 type Dispatcher struct {
 	socketHome string
-	sockets    map[string]channel
+	sockets    map[string]*channel
 	bus        chan bool
 }
 
 func New(socketHome string) *Dispatcher {
 	r := Dispatcher{
 		socketHome: socketHome,
-		sockets:    make(map[string]channel),
+		sockets:    make(map[string]*channel),
 		bus:        make(chan bool),
 	}
 	return &r
@@ -147,7 +147,7 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 		l,
 		handler,
 	}
-	r.sockets[username] = c
+	r.sockets[username] = &c
 	go c.listen()
 	return nil
 }
