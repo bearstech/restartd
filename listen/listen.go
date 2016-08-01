@@ -71,6 +71,10 @@ func mkdirp(path string, perm os.FileMode) error {
 		if err != nil {
 			return err
 		}
+		err = os.Chmod(path, perm)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -83,7 +87,7 @@ func buildSocket(home string, uzer *user.User) (*net.UnixListener, error) {
 
 	// socket dir
 	sd := home + "/" + uzer.Username
-	err = mkdirp(sd, 0644)
+	err = mkdirp(sd, 0700)
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +104,11 @@ func buildSocket(home string, uzer *user.User) (*net.UnixListener, error) {
 	}
 
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: sp, Net: "unix"})
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.Chmod(sp, 0600)
 	if err != nil {
 		return nil, err
 	}

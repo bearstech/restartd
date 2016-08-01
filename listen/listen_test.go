@@ -23,7 +23,7 @@ func TestListener(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, err = os.Stat("/tmp/test_restartd")
-	if !os.IsNotExist(err) {
+	if err == nil || !os.IsNotExist(err) {
 		err = os.RemoveAll("/tmp/test_restartd")
 		if err != nil {
 			t.Fatal(err)
