@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli"
 	"net"
 	"os"
+	"os/user"
 )
 
 var GITCOMMIT string
@@ -17,7 +18,11 @@ func ask(service *string, command *model.Message_Commands) (response *model.Resp
 
 	socket := os.Getenv("RESTARTCTL_SOCKET")
 	if socket == "" {
-		socket = "/tmp/restartctl.sock"
+		u, err := user.Current()
+		if err != nil {
+			return nil, err
+		}
+		socket = fmt.Sprintf("/tmp/restartd/%s/restartctl.sock", u.Username)
 	}
 	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{Name: socket,
 		Net: "unix"})
