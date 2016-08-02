@@ -86,7 +86,7 @@ func main() {
 		configs()
 
 		cc := make(chan os.Signal, 1)
-		signal.Notify(cc, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1)
+		signal.Notify(cc, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1, syscall.SIGTERM)
 		go func() {
 			for {
 				s := <-cc
