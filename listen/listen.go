@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"strconv"
+	"sync"
 )
 
 type Handler interface {
@@ -33,6 +34,7 @@ type Dispatcher struct {
 	socketHome string
 	sockets    map[string]*channel
 	bus        chan bool
+	lock       sync.Mutex
 }
 
 func New(socketHome string) *Dispatcher {
@@ -130,6 +132,8 @@ func buildSocket(home string, uzer *user.User) (*net.UnixListener, error) {
 func (r *Dispatcher) AddUser(username string, handler Handler) error {
 	// don't add when it already exist
 	if _, ok := r.sockets[username]; ok {
+		r.lock.Lock()
+		defer r.lock.Unlock()
 		r.sockets[username].handler = handler
 		return nil
 	}
@@ -154,6 +158,8 @@ func (r *Dispatcher) AddUser(username string, handler Handler) error {
 }
 
 func (r *Dispatcher) RemoveUser(user string) error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 	delete(r.sockets, user)
 	return os.Remove(r.socketHome + "/" + user + "/" + "restartctl.sock")
 }
