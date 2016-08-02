@@ -52,7 +52,7 @@ test: gopath/src/github.com/bearstech/restartd deps
 	go test github.com/bearstech/restartd/model/
 
 install:
-	cp bin/restartd /usr/local/bin
+	cp bin/restartd /usr/local/sbin
 	cp bin/restartctl $(ROOTFS)/usr/local/bin
 
 clean:
