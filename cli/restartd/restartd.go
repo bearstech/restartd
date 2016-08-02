@@ -16,6 +16,8 @@ var GITCOMMIT string
 
 func main() {
 
+	var prefix bool = true
+
 	app := cli.NewApp()
 	app.Version = "git:" + GITCOMMIT
 
@@ -24,12 +26,20 @@ func main() {
 			Name:  "Version, V",
 			Usage: "Version",
 		},
+		cli.BoolFlag{
+			Name:  "no-prefix, p",
+			Usage: "Disable prefix for unit names",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
 		if c.Bool("V") {
 			fmt.Printf("Restartd daemon git:%s\n", GITCOMMIT)
 			return nil
+		}
+
+		if c.Bool("p") {
+			prefix = false
 		}
 
 		fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
@@ -73,7 +83,8 @@ func main() {
 				err = r.AddUser(conf.User,
 					model.NewProtocolHandler(
 						&restartd.Handler{Services: conf.Services,
-							User: conf.User,
+							User:          conf.User,
+							PrefixService: prefix,
 						}))
 				if err != nil {
 					panic(err)
