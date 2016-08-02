@@ -92,12 +92,18 @@ Vagrant.configure("2") do |config|
     mkdir -p /home/vagrant/.go
     chown -R vagrant /home/vagrant/.go
     echo "#!/bin/bash
+cp -r /vagrant/contrib/systemd/restartd.service
+systemctl daemon-reload
 export GOROOT=/opt/go
 cd /home/vagrant && rsync -av --delete --exclude gopath /vagrant/ src/
 cd /home/vagrant/src && make && sudo make install" > /home/vagrant/build.sh
     chown vagrant /home/vagrant/build.sh
     chmod +x /home/vagrant/build.sh
-    cd /tmp && git clone https://github.com/sstephenson/bats.git
+    if [ ! -e /tmp/bats ]; then
+      cd /tmp && git clone https://github.com/sstephenson/bats.git;
+    else
+      cd /tmp/bats && git pull --rebase;
+    fi
     cd /tmp/bats && ./install.sh /usr/local
   SHELL
 end
