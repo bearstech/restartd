@@ -1,0 +1,12 @@
+[Unit]
+Description=Restartd, systemd remote control
+After=network.target
+
+[Service]
+ExecStart=/usr/local/sbin/restartd
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
