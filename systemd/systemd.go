@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/coreos/go-systemd/dbus"
 	"strings"
+	"time"
 )
 
 const (
@@ -46,6 +47,8 @@ type State struct {
 	Active ActiveState
 	Load   LoadState
 	Sub    SubState
+	//
+	Since time.Time
 }
 
 // Contains verify that requested unit is declared in a config file
