@@ -97,5 +97,7 @@ cd /home/vagrant && rsync -av --delete --exclude gopath /vagrant/ src/
 cd /home/vagrant/src && make && sudo make install" > /home/vagrant/build.sh
     chown vagrant /home/vagrant/build.sh
     chmod +x /home/vagrant/build.sh
+    cd /tmp && git clone https://github.com/sstephenson/bats.git
+    cd /tmp/bats && ./install.sh /usr/local
   SHELL
 end
