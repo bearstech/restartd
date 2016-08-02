@@ -20,6 +20,8 @@ Vagrant.configure("2") do |config|
     v.name   = "restartd"
     v.memory = 512
     v.cpus   = 2
+
+    config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
   end
 
   # Disable automatic box update checking. If you disable this, then
@@ -92,10 +94,11 @@ Vagrant.configure("2") do |config|
     mkdir -p /home/vagrant/.go
     chown -R vagrant /home/vagrant/.go
     echo "#!/bin/bash
-cp -r /vagrant/contrib/systemd/restartd.service
-systemctl daemon-reload
+sudo cp -r /vagrant/contrib/systemd/restartd.service /etc/systemd/system/
+sudo systemctl daemon-reload
+
 export GOROOT=/opt/go
-cd /home/vagrant && rsync -av --delete --exclude gopath /vagrant/ src/
+cd /home/vagrant && rsync -av --delete --exclude gopath --exclude .vagrant /vagrant/ src/
 cd /home/vagrant/src && make && sudo make install" > /home/vagrant/build.sh
     chown vagrant /home/vagrant/build.sh
     chmod +x /home/vagrant/build.sh
