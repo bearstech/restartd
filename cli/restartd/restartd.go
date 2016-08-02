@@ -49,13 +49,13 @@ func main() {
 
 		_, err := os.Stat(fldr)
 		if err != nil && os.IsExist(err) {
-			panic(err)
+			return err
 		}
 
 		if os.IsNotExist(err) {
 			err = os.Mkdir(fldr, 0644)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		log.Info("Socket folder is ", fldr)
@@ -119,6 +119,8 @@ func main() {
 	}
 	err := app.Run(os.Args)
 	if err != nil {
+		// FIXME yell to STDERR
+		fmt.Println(err)
 		os.Exit(-1)
 	}
 }
