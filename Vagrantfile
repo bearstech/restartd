@@ -78,8 +78,8 @@ Vagrant.configure("2") do |config|
   # SHELL
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    #apt-get -y upgrade
-    apt-get install -y curl make
+    apt-get -y upgrade
+    apt-get install -y curl make git tree vim
     GO_VERSION=1.6.3
     if [ ! -e /opt/go$GO_VERSION.linux-amd64.tar.gz ]; then
       echo "Get golang $GO_VERSION"
@@ -91,5 +91,11 @@ Vagrant.configure("2") do |config|
     fi
     mkdir -p /home/vagrant/.go
     chown -R vagrant /home/vagrant/.go
+    echo "#!/bin/bash
+export GOROOT=/opt/go
+cd /home/vagrant && rsync -av --delete --exclude gopath /vagrant/ src/
+cd /home/vagrant/src && make && sudo make install" > /home/vagrant/build.sh
+    chown vagrant /home/vagrant/build.sh
+    chmod +x /home/vagrant/build.sh
   SHELL
 end

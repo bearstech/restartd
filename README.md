@@ -15,6 +15,11 @@ _restartd_ run as root, talks to systemd via DBUS, listen one UNIX socket per us
 
 _restartctl_ send commands to _restartd_, just like _service_.
 
+Integration test
+----------------
+
+    vagrant ssh -c /home/vagrant/build.sh
+
 Licence
 -------
 
