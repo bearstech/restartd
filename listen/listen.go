@@ -130,6 +130,7 @@ func buildSocket(home string, uzer *user.User) (*net.UnixListener, error) {
 func (r *Dispatcher) AddUser(username string, handler Handler) error {
 	// don't add when it already exist
 	if _, ok := r.sockets[username]; ok {
+		r.sockets[username].handler = handler
 		return nil
 	}
 	// verify the user exists on the system
