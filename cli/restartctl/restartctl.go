@@ -17,7 +17,7 @@ func ask(service *string, command *model.Message_Commands) (response *model.Resp
 
 	socket := os.Getenv("RESTARTCTL_SOCKET")
 	if socket == "" {
-		socket = "/tmp/restartctl.sock"
+		socket = "/tmp/restartctl/restartctl.sock"
 	}
 	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{Name: socket,
 		Net: "unix"})
