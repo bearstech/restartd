@@ -105,11 +105,13 @@ sudo systemctl start restartd
 " > /home/vagrant/build.sh
     chown vagrant /home/vagrant/build.sh
     chmod +x /home/vagrant/build.sh
-    if [ ! -e /tmp/bats ]; then
-      cd /tmp && git clone https://github.com/sstephenson/bats.git;
-    else
-      cd /tmp/bats && git pull --rebase;
+    if [ ! -e /usr/local/bin/bats ]; then
+      if [ ! -e /tmp/bats ]; then
+        cd /tmp && git clone https://github.com/sstephenson/bats.git;
+      else
+        cd /tmp/bats && git pull --rebase;
+      fi
+      cd /tmp/bats && ./install.sh /usr/local;
     fi
-    cd /tmp/bats && ./install.sh /usr/local
   SHELL
 end
