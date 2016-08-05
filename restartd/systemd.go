@@ -46,8 +46,16 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 		service = fmt.Sprintf("%s-%s", h.User, service)
 	}
 
-	// verify if requested unit exists
-	ret := systemd.Contains(service, h.Services)
+	var ret bool
+
+	// prefix and whitelist are exclusives
+	// TODO can we have both?
+	if h.PrefixService {
+		ret = true
+	} else {
+		// verify if requested unit is whitelisted
+		ret = systemd.Contains(service, h.Services)
+	}
 
 	// if unit does not exists
 	if ret != true {
