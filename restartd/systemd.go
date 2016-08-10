@@ -60,10 +60,10 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 					})
 				}
 				r.Status = statuz
-			}
-			for service := range h.Services {
-				//FIXME find all service status
-				fmt.Println(service)
+				return model.Response{
+					Code:    &code,
+					Message: &message,
+				}
 			}
 		}
 	}
