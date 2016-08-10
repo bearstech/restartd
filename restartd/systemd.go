@@ -58,7 +58,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 	}
 
 	// if unit does not exists
-	if ret != true {
+	if !ret {
 		// write appropriate message
 		code = model.Response_err_missing
 		message = fmt.Sprintf("Service %s does not exists",
