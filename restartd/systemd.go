@@ -62,7 +62,7 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 		// write appropriate message
 		code = model.Response_err_missing
 		message = fmt.Sprintf("Service %s does not exists",
-			service)
+			m.GetService())
 	} else {
 
 		// switch between all supported commands
