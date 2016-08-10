@@ -61,26 +61,28 @@ func Contains(needle string, haystack []string) bool {
 	return false
 }
 
-func GetAllStatus(unitNames []string) error {
-	serviceNames := make([]string, len(unitNames))
-	for i, n := range unitNames {
-		serviceNames[i] = CreateServiceName(n)
-	}
-
+// GetStatusWithPrefix return status of unit matching the prefix
+func GetStatusWithPrefix(prefix string) ([]dbus.UnitStatus, error) {
+	statuz := []dbus.UnitStatus{}
 	// create systemd-dbus conn
 	conn, err := dbus.New()
 	// ensure conn is closed
 	defer conn.Close()
 	if err != nil {
-		return err
+		return statuz, err
 	}
 
-	//unitsStatus, err := conn.ListUnits()
+	unitsStatus, err := conn.ListUnits()
 	if err != nil {
-		return err
+		return statuz, err
+	}
+	for _, us := range unitsStatus {
+		if strings.HasPrefix(us.Name, prefix) {
+			statuz = append(statuz, us)
+		}
 	}
 
-	return nil
+	return statuz, nil
 
 }
 
