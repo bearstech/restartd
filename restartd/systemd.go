@@ -25,6 +25,18 @@ type Handler struct {
 	PrefixService bool
 }
 
+func State(loadState, activeState, subsState string) model.Response_Statuz_Codes {
+	// FIXME this is ugly, needs more love
+	if loadState != string(systemd.LOADSTATE_LOADED) {
+		return model.Response_Statuz_failed
+	}
+	if activeState == string(systemd.ACTIVESTATE_ACTIVE) &&
+		subsState == string(systemd.SUBSTATE_ACTIVE) {
+		return model.Response_Statuz_started
+	}
+	return model.Response_Statuz_stopped
+}
+
 // func Handle
 // implemented by Handler interface
 func (h *Handler) Handle(m model.Message) (r model.Response) {
@@ -34,6 +46,21 @@ func (h *Handler) Handle(m model.Message) (r model.Response) {
 
 	if m.GetService() == "--all" {
 		if m.GetCommand() == model.Message_status {
+			if h.PrefixService {
+				us, err := systemd.GetStatusWithPrefix(h.User + "-")
+				if err != nil {
+					// On va tous mourir
+				}
+				statuz := []*model.Response_Statuz{}
+				for _, u := range us {
+					code := State(u.LoadState, u.ActiveState, u.SubState)
+					statuz = append(statuz, &model.Response_Statuz{
+						Service: &u.Name,
+						Code:    &code,
+					})
+				}
+				r.Status = statuz
+			}
 			for service := range h.Services {
 				//FIXME find all service status
 				fmt.Println(service)
