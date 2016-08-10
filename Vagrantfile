@@ -81,7 +81,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get -y upgrade
-    apt-get install -y curl make git tree vim
+    apt-get install -y curl make git tree vim libglib2.0-bin
     GO_VERSION=1.6.3
     if [ ! -e /opt/go$GO_VERSION.linux-amd64.tar.gz ]; then
       echo "Get golang $GO_VERSION"
