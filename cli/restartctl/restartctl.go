@@ -47,7 +47,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Version = "git:" + GITCOMMIT
-	app.Usage = "Restartcl is a CLI for Restartd"
+	app.Usage = fmt.Sprintf("%s is a CLI for Restartd", app.Name)
 	app.HideVersion = true
 
 	app.Flags = []cli.Flag{
