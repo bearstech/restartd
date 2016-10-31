@@ -53,7 +53,7 @@ test: gopath/src/github.com/bearstech/restartd deps
 
 install:
 	cp bin/restartd /usr/local/sbin
-	cp bin/restartctl $(ROOTFS)/usr/local/bin
+	cp bin/restartctl $(ROOTFS)/opt/factory/
 
 clean:
 	rm -rf gopath
