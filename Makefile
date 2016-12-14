@@ -46,10 +46,7 @@ restartd: bin gopath deps
 	go build -ldflags "${LDFLAGS}" -o bin/restartd github.com/bearstech/restartd/cli/restartd/
 
 test: gopath/src/github.com/bearstech/restartd deps
-	go test github.com/bearstech/restartd/listen/
-	go test github.com/bearstech/restartd/protocol/
 	go test github.com/bearstech/restartd/restartd/
-	go test github.com/bearstech/restartd/model/
 
 install:
 	cp bin/restartd /usr/local/sbin
@@ -63,7 +60,6 @@ linux:
 	docker run -it --rm -v `pwd`:/go golang make
 
 protoc:
-	protoc --go_out=. model/*.proto
 	protoc --go_out=. restartd/*.proto
 
 vet:
