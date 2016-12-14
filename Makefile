@@ -17,6 +17,9 @@ gopath/src/github.com/bearstech/restartd:
 	mkdir -p gopath/src/github.com/bearstech
 	ln -s ../../../.. gopath/src/github.com/bearstech/restartd
 
+gopath/src/github.com/bearstech/ascetic-rpc:
+	go get github.com/bearstech/ascetic-rpc/client
+
 gopath/src/gopkg.in/yaml.v2:
 	go get gopkg.in/yaml.v2
 
@@ -34,7 +37,7 @@ gopath/src/github.com/urfave/cli:
 
 gopath: gopath/src/github.com/bearstech/restartd
 
-deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus gopath/src/github.com/golang/protobuf/proto gopath/src/github.com/coreos/go-systemd/dbus gopath/src/github.com/urfave/cli
+deps: gopath/src/gopkg.in/yaml.v2 gopath/src/github.com/Sirupsen/logrus gopath/src/github.com/golang/protobuf/proto gopath/src/github.com/coreos/go-systemd/dbus gopath/src/github.com/urfave/cli gopath/src/github.com/bearstech/ascetic-rpc
 
 bin:
 	mkdir -p bin
