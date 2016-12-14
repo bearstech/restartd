@@ -6,10 +6,15 @@ message Service {
 }
 
 message Status {
-    enum Codes {
+    enum States {
         started  = 0;
         stopped  = 1;
         failed   = 2;
     }
-    map<string, Codes> Status = 1;
+    message State {
+        string Name =  1;
+        States State = 2;
+        int32 Since =  3;
+    }
+    repeated State Status = 1;
 }

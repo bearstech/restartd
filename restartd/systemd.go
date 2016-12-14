@@ -30,7 +30,7 @@ func (r *Restartd) isWhitelisted(service string) error {
 }
 
 func (r *Restartd) getStatus(serviceName string) (*Status, error) {
-	status := NewStatus()
+	status := &Status{}
 	if serviceName == "--all" {
 		if r.PrefixService {
 			us, err := systemd.GetStatusWithPrefix(r.User + "-")
@@ -38,7 +38,10 @@ func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 				return nil, err
 			}
 			for _, u := range us {
-				status.Status[u.Name] = State(u.LoadState, u.ActiveState, u.SubState)
+				status.Status = append(status.Status, &Status_State{
+					Name:  u.Name,
+					State: State(u.LoadState, u.ActiveState, u.SubState),
+				})
 			}
 		}
 		return status, nil
@@ -57,7 +60,10 @@ func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 	}
 
 	// FIXME it's horrible the status should came from _
-	status.Status[serviceName] = Status_started
+	status.Status = append(status.Status, &Status_State{
+		Name:  serviceName,
+		State: Status_started,
+	})
 
 	return status, nil
 }
@@ -160,7 +166,7 @@ func (r *Restartd) Reload(req *model.Request) (resp *model.Response, err error) 
 	return model.NewOKResponse(nil)
 }
 
-func State(loadState, activeState, subsState string) Status_Codes {
+func State(loadState, activeState, subsState string) Status_States {
 	// FIXME this is ugly, needs more love
 	if loadState != string(systemd.LOADSTATE_LOADED) {
 		return Status_failed
