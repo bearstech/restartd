@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/bearstech/restartd/listen"
-	"github.com/bearstech/restartd/model"
+	"github.com/bearstech/ascetic-rpc/server"
 	"github.com/bearstech/restartd/restartd"
 	"github.com/urfave/cli"
 	"os"
@@ -47,21 +46,7 @@ func main() {
 			fldr = "/tmp/restartd"
 		}
 
-		_, err := os.Stat(fldr)
-		if err != nil && os.IsExist(err) {
-			return err
-		}
-
-		if os.IsNotExist(err) {
-			err = os.Mkdir(fldr, 0644)
-			if err != nil {
-				return err
-			}
-		}
-		log.Info("Socket folder is ", fldr)
-
-		r := listen.New(fldr)
-		defer r.Cleanup()
+		servers := server.NewServerUsers(fldr, "restart.sock")
 
 		confFolder := os.Getenv("RESTARTD_CONF")
 
@@ -80,15 +65,21 @@ func main() {
 				//os.Exit(-1)
 			}
 			for _, conf := range confs {
-				err = r.AddUser(conf.User,
-					model.NewProtocolHandler(
-						&restartd.Handler{Services: conf.Services,
-							User:          conf.User,
-							PrefixService: prefix,
-						}))
+				r := &restartd.Restartd{
+					PrefixService: true, //FIXME where does this setup came from?
+					User:          conf.User,
+					Services:      conf.Services,
+				}
+				myserver, err := servers.AddUser(conf.User)
 				if err != nil {
 					panic(err)
 				}
+				myserver.Register("status", r.Status)
+				myserver.Register("start", r.Start)
+				myserver.Register("stop", r.Stop)
+				myserver.Register("restart", r.Restart)
+				myserver.Register("reload", r.Reload)
+
 				log.Info("Add user ", conf.User)
 			}
 			log.Info("Number of users : ", len(confs))
@@ -104,9 +95,9 @@ func main() {
 				log.Info("Signal : ", s)
 				switch s {
 				case os.Interrupt:
-					r.Stop()
+					servers.Stop()
 				case syscall.SIGTERM:
-					r.Stop()
+					servers.Stop()
 				case syscall.SIGHUP:
 					configs()
 				}
@@ -114,7 +105,7 @@ func main() {
 		}()
 
 		// listen and block
-		r.Listen()
+		servers.Serve()
 		return nil
 	}
 	err := app.Run(os.Args)
