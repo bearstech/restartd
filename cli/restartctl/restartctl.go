@@ -3,45 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/bearstech/restartd/model"
-	"github.com/bearstech/restartd/protocol"
-	"github.com/urfave/cli"
-	"net"
 	"os"
+
+	"github.com/bearstech/ascetic-rpc/client"
+	"github.com/bearstech/restartd/restartd"
+	"github.com/urfave/cli"
 )
 
 var GITCOMMIT string
 var VERSION string
-
-func ask(service *string, command *model.Message_Commands) (response *model.Response, err error) {
-
-	socket := os.Getenv("RESTARTCTL_SOCKET")
-	if socket == "" {
-		socket = "/tmp/restartctl/restartctl.sock"
-	}
-	conn, err := net.DialUnix("unix", nil, &net.UnixAddr{Name: socket,
-		Net: "unix"})
-	if err != nil {
-		return nil, err
-	}
-
-	msg := model.Message{
-		Service: service,
-		Command: command,
-	}
-	err = protocol.Write(conn, &msg)
-	if err != nil {
-		return nil, err
-	}
-
-	response = &model.Response{}
-	err = protocol.Read(conn, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
 
 func main() {
 
@@ -66,15 +36,22 @@ func main() {
 			fmt.Printf("Restartcl CLI git:%s\n", GITCOMMIT)
 			return nil
 		}
+		socket := os.Getenv("RESTARTCTL_SOCKET")
+		if socket == "" {
+			socket = "/tmp/restartctl/restart.sock"
+		}
+		cl, err := client.NewClientUnix(socket)
+		if err != nil {
+			return err
+		}
 		if c.Bool("status-all") {
-			service := "--all"
-			command := model.Message_status
-			response, err := ask(&service, &command)
+			var status restartd.Status
+			err = cl.Do("status", &restartd.Service{Name: "--all"}, &status)
 			if err != nil {
 				return err
 			}
 			//FIXME display blabla
-			fmt.Println(response)
+			fmt.Println(status)
 			return nil
 		}
 		if c.NArg() == 0 {
@@ -86,15 +63,12 @@ func main() {
 		}
 
 		service := c.Args().Get(0)
-		command, err := model.ParseCommand(c.Args().Get(1))
+		err = cl.Do(c.Args().Get(1), &restartd.Service{Name: service}, nil)
+
 		if err != nil {
 			return err
 		}
-		response, err := ask(&service, &command)
-		if err != nil {
-			return err
-		}
-		fmt.Println(*response.Code, ":", *response.Message)
+		fmt.Println("Done")
 		return nil
 	}
 
