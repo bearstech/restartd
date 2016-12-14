@@ -1,0 +1,15 @@
+syntax = "proto3";
+package restartd;
+
+message Service {
+    string Name = 1;
+}
+
+message Status {
+    enum Codes {
+        started  = 0;
+        stopped  = 1;
+        failed   = 2;
+    }
+    map<string, Codes> Status = 1;
+}

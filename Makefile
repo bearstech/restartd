@@ -64,6 +64,7 @@ linux:
 
 protoc:
 	protoc --go_out=. model/*.proto
+	protoc --go_out=. restartd/*.proto
 
 vet:
 	go vet github.com/bearstech/restartd/restartctl
