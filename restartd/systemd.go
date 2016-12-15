@@ -29,24 +29,25 @@ func (r *Restartd) isWhitelisted(service string) error {
 	return fmt.Errorf("Service not found : %s", service)
 }
 
+func (r *Restartd) getAllStatus() (*Status, error) {
+	status := &Status{}
+	if r.PrefixService {
+		us, err := systemd.GetStatusWithPrefix(r.User + "-")
+		if err == nil {
+			return nil, err
+		}
+		for _, u := range us {
+			status.Status = append(status.Status, &Status_State{
+				Name:  u.Name,
+				State: State(u.LoadState, u.ActiveState, u.SubState),
+			})
+		}
+	}
+	return status, nil
+}
+
 func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 	status := &Status{}
-	if serviceName == "--all" {
-		if r.PrefixService {
-			us, err := systemd.GetStatusWithPrefix(r.User + "-")
-			if err == nil {
-				return nil, err
-			}
-			for _, u := range us {
-				status.Status = append(status.Status, &Status_State{
-					Name:  u.Name,
-					State: State(u.LoadState, u.ActiveState, u.SubState),
-				})
-			}
-		}
-		return status, nil
-	}
-
 	service := r.serviceName(serviceName)
 
 	err := r.isWhitelisted(service)
@@ -66,6 +67,15 @@ func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 	})
 
 	return status, nil
+}
+
+func (r *Restartd) StatusAll(req *model.Request) (resp *model.Response, err error) {
+	status, err := r.getAllStatus()
+	if err == nil {
+		return nil, err
+	}
+
+	return model.NewOKResponse(status)
 }
 
 func (r *Restartd) Status(req *model.Request) (resp *model.Response, err error) {

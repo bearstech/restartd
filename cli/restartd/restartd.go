@@ -74,6 +74,7 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
+				myserver.Register("statusAll", r.StatusAll)
 				myserver.Register("status", r.Status)
 				myserver.Register("start", r.Start)
 				myserver.Register("stop", r.Stop)

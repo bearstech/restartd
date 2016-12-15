@@ -22,9 +22,10 @@ message Status {
 }
 
 service Restartd {
-    rpc status(Service)  returns (Status) {}
-    rpc start(Service)   returns (google.protobuf.Empty) {}
-    rpc stop(Service)    returns (google.protobuf.Empty) {}
-    rpc restart(Service) returns (google.protobuf.Empty) {}
-    rpc reload(Service)  returns (google.protobuf.Empty) {}
+    rpc status(Service)                  returns (Status) {}
+    rpc statusAll(google.protobuf.Empty) returns (Status) {}
+    rpc start(Service)                   returns (google.protobuf.Empty) {}
+    rpc stop(Service)                    returns (google.protobuf.Empty) {}
+    rpc restart(Service)                 returns (google.protobuf.Empty) {}
+    rpc reload(Service)                  returns (google.protobuf.Empty) {}
 };

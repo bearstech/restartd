@@ -46,7 +46,7 @@ func main() {
 		}
 		if c.Bool("status-all") {
 			var status restartd.Status
-			err = cl.Do("status", &restartd.Service{Name: "--all"}, &status)
+			err = cl.Do("statusAll", nil, &status)
 			if err != nil {
 				return err
 			}
