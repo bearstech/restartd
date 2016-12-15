@@ -1,6 +1,8 @@
 syntax = "proto3";
 package restartd;
 
+import "empty.proto";
+
 message Service {
     string Name = 1;
 }
@@ -18,3 +20,11 @@ message Status {
     }
     repeated State Status = 1;
 }
+
+service Restartd {
+    rpc status(Service)  returns (Status) {}
+    rpc start(Service)   returns (google.protobuf.Empty) {}
+    rpc stop(Service)    returns (google.protobuf.Empty) {}
+    rpc restart(Service) returns (google.protobuf.Empty) {}
+    rpc reload(Service)  returns (google.protobuf.Empty) {}
+};

@@ -63,7 +63,7 @@ linux:
 	docker run -it --rm -v `pwd`:/go golang make
 
 protoc:
-	protoc --go_out=. restartd/*.proto
+	protoc -Igopath/src/github.com/golang/protobuf/ptypes/empty/ -Irestartd --go_out=. restartd/*.proto
 
 vet:
 	go vet github.com/bearstech/restartd/restartctl
