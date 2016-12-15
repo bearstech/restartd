@@ -18,7 +18,7 @@ gopath/src/github.com/bearstech/restartd:
 	ln -s ../../../.. gopath/src/github.com/bearstech/restartd
 
 gopath/src/github.com/bearstech/ascetic-rpc:
-	go get github.com/bearstech/ascetic-rpc/client
+	go get github.com/bearstech/ascetic-rpc
 
 gopath/src/gopkg.in/yaml.v2:
 	go get gopkg.in/yaml.v2
