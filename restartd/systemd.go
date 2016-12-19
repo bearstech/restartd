@@ -40,7 +40,9 @@ func (r *Restartd) isWhitelisted(service string) error {
 }
 
 func (r *Restartd) getAllStatus() (*Status, error) {
-	status := &Status{}
+	status := &Status{
+		Status: []*Status_State{},
+	}
 	if r.PrefixService {
 		us, err := systemd.GetStatusWithPrefix(r.User + "-")
 		if err == nil {
@@ -58,14 +60,18 @@ func (r *Restartd) getAllStatus() (*Status, error) {
 			if err != nil {
 				return nil, err
 			}
-			status.Status = append(status.Status, s.Status[0])
+			if s == nil {
+				panic(fmt.Errorf("Oh my God, it's nil"))
+			}
+			if len(s.Status) == 1 {
+				status.Status = append(status.Status, s.Status[0])
+			}
 		}
 	}
 	return status, nil
 }
 
 func (r *Restartd) getStatus(serviceName string) (*Status, error) {
-	status := &Status{}
 	service := r.serviceName(serviceName)
 
 	err := r.isWhitelisted(service)
@@ -78,13 +84,12 @@ func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 		return nil, err
 	}
 
-	// FIXME it's horrible the status should came from _
-	status.Status = append(status.Status, &Status_State{
-		Name:  serviceName,
-		State: statusState(st.State),
-	})
-
-	return status, nil
+	return &Status{
+		Status: []*Status_State{&Status_State{
+			Name:  serviceName,
+			State: statusState(st.State),
+		}},
+	}, nil
 }
 
 func (r *Restartd) StatusAll(req *model.Request) (resp *model.Response, err error) {
