@@ -82,7 +82,7 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get -y upgrade
     apt-get install -y curl make git tree vim libglib2.0-bin
-    GO_VERSION=1.6.3
+    GO_VERSION=1.7.4
     if [ ! -e /opt/go$GO_VERSION.linux-amd64.tar.gz ]; then
       echo "Get golang $GO_VERSION"
       curl -sq -o /opt/go$GO_VERSION.linux-amd64.tar.gz https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz;
