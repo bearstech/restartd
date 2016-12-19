@@ -51,6 +51,14 @@ type State struct {
 	Since time.Time
 }
 
+type Unit struct {
+	Name        string
+	Path        string
+	Type        string
+	Description string
+	State       *State
+}
+
 // Contains verify that requested unit is declared in a config file
 func Contains(needle string, haystack []string) bool {
 	for _, v := range haystack {
@@ -87,7 +95,7 @@ func GetStatusWithPrefix(prefix string) ([]dbus.UnitStatus, error) {
 }
 
 // GetStatus fetch status for a requested unit
-func GetStatus(unitName string) (string, error) {
+func GetStatus(unitName string) (*Unit, error) {
 
 	// concatenante uinitName + .service in a serviceName string
 	serviceName := CreateServiceName(unitName)
@@ -97,16 +105,14 @@ func GetStatus(unitName string) (string, error) {
 	// ensure conn is closed
 	defer conn.Close()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// call to systemd-dbus
 	// step 1, get all **loaded** units
 	unitsStatus, err := conn.ListUnits()
 	if err != nil {
-		message := fmt.Sprintf("Error getting %s service status",
-			serviceName)
-		return message, err
+		return nil, err
 	}
 
 	// for each units, find the requested one
@@ -116,16 +122,14 @@ func GetStatus(unitName string) (string, error) {
 			message := LoadedStatusMessage(v)
 
 			// return message to restartctl client
-			return message, err
+			return message, nil
 		}
 	}
 
 	// go deeper
 	unitsFiles, err := conn.ListUnitFiles()
 	if err != nil {
-		message := fmt.Sprintf("Error getting %s service file",
-			serviceName)
-		return message, err
+		return nil, err
 	}
 
 	// search for unit
@@ -134,16 +138,12 @@ func GetStatus(unitName string) (string, error) {
 			// create basic response message
 			message := UnloadedStatusMessage(v)
 			// return message to stopctl client
-			return message, err
+			return message, nil
 		}
 	}
 
 	// if unit not found
-	message := fmt.Sprintf("Error %s service or unit not found", serviceName)
-
-	// return an error
-	return message, err
-
+	return nil, fmt.Errorf("Error %s service or unit not found", serviceName)
 }
 
 // CreateServiceName creates service name
@@ -152,20 +152,24 @@ func CreateServiceName(unitName string) string {
 }
 
 // LoadedStatusMessage creates a basic status message (used with loaded units)
-func LoadedStatusMessage(unit dbus.UnitStatus) string {
-
-	return fmt.Sprintf("Name: %s\n\tDescription: %s\n\tLoad: "+
-		"%s\n\tActive: %s\n\tState: %s\n", unit.Name, unit.Description,
-		unit.LoadState, unit.ActiveState, unit.SubState)
-
+func LoadedStatusMessage(unit dbus.UnitStatus) *Unit {
+	return &Unit{
+		Name:        unit.Name,
+		Description: unit.Description,
+		State: &State{
+			Load:   LoadState(unit.LoadState),
+			Active: ActiveState(unit.ActiveState),
+			Sub:    SubState(unit.SubState),
+		},
+	}
 }
 
 // UnloadedStatusMessage creates a basic status message (used with unloaded units)
-func UnloadedStatusMessage(unitFile dbus.UnitFile) string {
-
-	return fmt.Sprintf("Name: %s\n\tStatus: %s\n", unitFile.Path,
-		unitFile.Type)
-
+func UnloadedStatusMessage(unitFile dbus.UnitFile) *Unit {
+	return &Unit{
+		Path: unitFile.Path,
+		Type: unitFile.Type,
+	}
 }
 
 func dbusConn(unitName string, closure func(serviceName string, conn *dbus.Conn, ch chan string) error) error {
