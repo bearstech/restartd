@@ -88,9 +88,7 @@ Vagrant.configure("2") do |config|
       curl -sq -o /opt/go$GO_VERSION.linux-amd64.tar.gz https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz;
       cd /opt/ && tar -xvzf go$GO_VERSION.linux-amd64.tar.gz
     fi
-    if [ ! -e /usr/local/bin/go ]; then
-      ln -s /opt/go/bin/go /usr/local/bin/;
-    fi
+    ln -sf /opt/go/bin/go /usr/local/bin/;
     mkdir -p /home/vagrant/.go
     chown -R vagrant /home/vagrant/.go
     echo "#!/bin/bash
