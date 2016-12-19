@@ -53,6 +53,7 @@ test: gopath/src/github.com/bearstech/restartd deps
 
 install:
 	cp bin/restartd /usr/local/sbin
+	mkdir -p $(ROOTFS)/opt/factory/
 	cp bin/restartctl $(ROOTFS)/opt/factory/
 
 clean:
