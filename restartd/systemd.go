@@ -60,9 +60,6 @@ func (r *Restartd) getAllStatus() (*Status, error) {
 			if err != nil {
 				return nil, err
 			}
-			if s == nil {
-				panic(fmt.Errorf("Oh my God, it's nil"))
-			}
 			if len(s.Status) == 1 {
 				status.Status = append(status.Status, s.Status[0])
 			}
@@ -80,7 +77,7 @@ func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 	}
 
 	st, err := systemd.GetStatus(service)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
