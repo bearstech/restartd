@@ -46,6 +46,10 @@ func main() {
 			fldr = "/tmp/restartd"
 		}
 
+		err := os.Chmod(fldr, os.FileMode(0755))
+		if err != nil {
+			return err
+		}
 		servers := server.NewServerUsers(fldr, "restart.sock")
 
 		confFolder := os.Getenv("RESTARTD_CONF")
