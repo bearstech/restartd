@@ -97,8 +97,10 @@ sudo systemctl daemon-reload
 
 export GOROOT=/opt/go
 cd /home/vagrant && rsync -av --delete --exclude gopath --exclude .vagrant --exclude bin /vagrant/ src/
+sudo mkdir -p /etc/restartd/conf.d
 sudo systemctl stop restartd
 cd /home/vagrant/src && make && sudo make install
+sudo ln -sf /home/vagrant/src/bin/restartctl /usr/local/bin/
 sudo systemctl start restartd
 " > /home/vagrant/build.sh
     chown vagrant /home/vagrant/build.sh
