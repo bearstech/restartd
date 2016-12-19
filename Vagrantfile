@@ -98,11 +98,17 @@ sudo systemctl daemon-reload
 export GOROOT=/opt/go
 cd /home/vagrant && rsync -av --delete --exclude gopath --exclude .vagrant --exclude bin /vagrant/ src/
 sudo mkdir -p /etc/restartd/conf.d
+sudo chown vagrant /etc/restartd/conf.d
 sudo systemctl stop restartd
 cd /home/vagrant/src && make && sudo make install
 sudo ln -sf /home/vagrant/src/bin/restartctl /usr/local/bin/
 sudo systemctl start restartd
 " > /home/vagrant/build.sh
+    echo "
+user: vagrant
+services:
+ - rsyslog
+" > /etc/restartd/conf.d/vagrant.yml
     chown vagrant /home/vagrant/build.sh
     chmod +x /home/vagrant/build.sh
     if [ ! -e /usr/local/bin/bats ]; then
