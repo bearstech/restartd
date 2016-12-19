@@ -42,6 +42,14 @@ func (r *Restartd) getAllStatus() (*Status, error) {
 				State: State(u.LoadState, u.ActiveState, u.SubState),
 			})
 		}
+	} else {
+		for _, service := range r.Services {
+			s, err := r.getStatus(service)
+			if err != nil {
+				return nil, err
+			}
+			status.Status = append(status.Status, s.Status[0])
+		}
 	}
 	return status, nil
 }

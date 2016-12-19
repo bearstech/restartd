@@ -70,7 +70,7 @@ func main() {
 			}
 			for _, conf := range confs {
 				r := &restartd.Restartd{
-					PrefixService: true, //FIXME where does this setup came from?
+					PrefixService: prefix,
 					User:          conf.User,
 					Services:      conf.Services,
 				}
