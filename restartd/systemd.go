@@ -12,6 +12,16 @@ type Restartd struct {
 	Services      []string
 }
 
+func statusState(s *systemd.State) Status_States {
+	if s.Active == systemd.ACTIVESTATE_ACTIVE {
+		return Status_started
+	}
+	if s.Active == systemd.ACTIVESTATE_INACTIVE {
+		return Status_stopped
+	}
+	return Status_failed
+}
+
 func (r *Restartd) serviceName(name string) string {
 	if r.PrefixService { // alice asks for web, but it's alice-web
 		return fmt.Sprintf("%s-%s", r.User, name)
@@ -63,7 +73,7 @@ func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 		return nil, err
 	}
 
-	_, err = systemd.GetStatus(service)
+	st, err := systemd.GetStatus(service)
 	if err == nil {
 		return nil, err
 	}
@@ -71,7 +81,7 @@ func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 	// FIXME it's horrible the status should came from _
 	status.Status = append(status.Status, &Status_State{
 		Name:  serviceName,
-		State: Status_started,
+		State: statusState(st.State),
 	})
 
 	return status, nil
