@@ -17,3 +17,16 @@ func TestAllStatus(t *testing.T) {
 	}
 	fmt.Println(s)
 }
+
+func TestAllPrefixStatus(t *testing.T) {
+	r := &Restartd{
+		PrefixService: true,
+		User:          "systemd",
+		Services:      []string{},
+	}
+	s, err := r.getAllStatus()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(s)
+}

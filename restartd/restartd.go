@@ -12,16 +12,6 @@ type Restartd struct {
 	Services      []string
 }
 
-func statusState(s *systemd.State) Status_States {
-	if s.Active == systemd.ACTIVESTATE_ACTIVE {
-		return Status_started
-	}
-	if s.Active == systemd.ACTIVESTATE_INACTIVE {
-		return Status_stopped
-	}
-	return Status_failed
-}
-
 func (r *Restartd) serviceName(name string) string {
 	if r.PrefixService { // alice asks for web, but it's alice-web
 		return fmt.Sprintf("%s-%s", r.User, name)
@@ -39,19 +29,17 @@ func (r *Restartd) isWhitelisted(service string) error {
 	return fmt.Errorf("Service not found : %s", service)
 }
 
-func (r *Restartd) getAllStatus() (*Status, error) {
-	status := &Status{
-		Status: []*Status_State{},
-	}
+func (r *Restartd) getAllStatus() ([]*Status_State, error) {
+	states := []*Status_State{}
 	if r.PrefixService {
-		us, err := systemd.GetStatusWithPrefix(r.User + "-")
-		if err == nil {
+		units, err := systemd.GetStatusWithPrefix(r.User + "-")
+		if err != nil {
 			return nil, err
 		}
-		for _, u := range us {
-			status.Status = append(status.Status, &Status_State{
-				Name:  u.Name,
-				State: State(u.LoadState, u.ActiveState, u.SubState),
+		for _, unit := range units {
+			states = append(states, &Status_State{
+				Name:  unit.Name,
+				State: statusState(unit.State),
 			})
 		}
 	} else {
@@ -60,15 +48,13 @@ func (r *Restartd) getAllStatus() (*Status, error) {
 			if err != nil {
 				return nil, err
 			}
-			if len(s.Status) == 1 {
-				status.Status = append(status.Status, s.Status[0])
-			}
+			states = append(states, s)
 		}
 	}
-	return status, nil
+	return states, nil
 }
 
-func (r *Restartd) getStatus(serviceName string) (*Status, error) {
+func (r *Restartd) getStatus(serviceName string) (*Status_State, error) {
 	service := r.serviceName(serviceName)
 
 	err := r.isWhitelisted(service)
@@ -81,13 +67,27 @@ func (r *Restartd) getStatus(serviceName string) (*Status, error) {
 		return nil, err
 	}
 
-	return &Status{
-		Status: []*Status_State{&Status_State{
-			Name:  serviceName,
-			State: statusState(st.State),
-		}},
+	return &Status_State{
+		Name:  serviceName,
+		State: statusState(st.State),
 	}, nil
 }
+
+func statusState(s *systemd.State) Status_States {
+	if s.Active == systemd.ACTIVESTATE_ACTIVE {
+		return Status_started
+	}
+	if s.Active == systemd.ACTIVESTATE_INACTIVE {
+		return Status_stopped
+	}
+	return Status_failed
+}
+
+/*
+
+RPC
+
+*/
 
 func (r *Restartd) StatusAll(req *model.Request) (resp *model.Response, err error) {
 	status, err := r.getAllStatus()
@@ -95,7 +95,7 @@ func (r *Restartd) StatusAll(req *model.Request) (resp *model.Response, err erro
 		return nil, err
 	}
 
-	return model.NewOKResponse(status)
+	return model.NewOKResponse(&Status{Status: status})
 }
 
 func (r *Restartd) Status(req *model.Request) (resp *model.Response, err error) {
@@ -194,16 +194,4 @@ func (r *Restartd) Reload(req *model.Request) (resp *model.Response, err error) 
 	}
 
 	return model.NewOKResponse(nil)
-}
-
-func State(loadState, activeState, subsState string) Status_States {
-	// FIXME this is ugly, needs more love
-	if loadState != string(systemd.LOADSTATE_LOADED) {
-		return Status_failed
-	}
-	if activeState == string(systemd.ACTIVESTATE_ACTIVE) &&
-		subsState == string(systemd.SUBSTATE_ACTIVE) {
-		return Status_started
-	}
-	return Status_stopped
 }

@@ -70,8 +70,8 @@ func Contains(needle string, haystack []string) bool {
 }
 
 // GetStatusWithPrefix return status of unit matching the prefix
-func GetStatusWithPrefix(prefix string) ([]dbus.UnitStatus, error) {
-	statuz := []dbus.UnitStatus{}
+func GetStatusWithPrefix(prefix string) ([]*Unit, error) {
+	statuz := []*Unit{}
 	// create systemd-dbus conn
 	conn, err := dbus.New()
 	// ensure conn is closed
@@ -86,12 +86,10 @@ func GetStatusWithPrefix(prefix string) ([]dbus.UnitStatus, error) {
 	}
 	for _, us := range unitsStatus {
 		if strings.HasPrefix(us.Name, prefix) {
-			statuz = append(statuz, us)
+			statuz = append(statuz, LoadedStatusMessage(us))
 		}
 	}
-
 	return statuz, nil
-
 }
 
 // GetStatus fetch status for a requested unit
