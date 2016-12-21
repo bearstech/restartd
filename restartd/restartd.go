@@ -91,7 +91,7 @@ RPC
 
 func (r *Restartd) StatusAll(req *model.Request) (resp *model.Response, err error) {
 	status, err := r.getAllStatus()
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -101,12 +101,12 @@ func (r *Restartd) StatusAll(req *model.Request) (resp *model.Response, err erro
 func (r *Restartd) Status(req *model.Request) (resp *model.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
 	status, err := r.getStatus(service.Name)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -116,7 +116,7 @@ func (r *Restartd) Status(req *model.Request) (resp *model.Response, err error) 
 func (r *Restartd) Start(req *model.Request) (resp *model.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -127,7 +127,7 @@ func (r *Restartd) Start(req *model.Request) (resp *model.Response, err error) {
 	}
 
 	err = systemd.StartUnit(serviceName)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -137,7 +137,7 @@ func (r *Restartd) Start(req *model.Request) (resp *model.Response, err error) {
 func (r *Restartd) Stop(req *model.Request) (resp *model.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -148,7 +148,7 @@ func (r *Restartd) Stop(req *model.Request) (resp *model.Response, err error) {
 	}
 
 	err = systemd.StopUnit(serviceName)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -158,7 +158,7 @@ func (r *Restartd) Stop(req *model.Request) (resp *model.Response, err error) {
 func (r *Restartd) Restart(req *model.Request) (resp *model.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -169,7 +169,7 @@ func (r *Restartd) Restart(req *model.Request) (resp *model.Response, err error)
 	}
 
 	err = systemd.RestartUnit(serviceName)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -179,7 +179,7 @@ func (r *Restartd) Restart(req *model.Request) (resp *model.Response, err error)
 func (r *Restartd) Reload(req *model.Request) (resp *model.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -189,7 +189,7 @@ func (r *Restartd) Reload(req *model.Request) (resp *model.Response, err error) 
 		return nil, err
 	}
 	err = systemd.ReloadUnit(serviceName)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
