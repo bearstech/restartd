@@ -2,6 +2,7 @@ package restartd
 
 import (
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/ascetic-rpc/model"
 	"github.com/bearstech/restartd/systemd"
 )
@@ -90,6 +91,7 @@ RPC
 */
 
 func (r *Restartd) StatusAll(req *model.Request) (resp *model.Response, err error) {
+	log.Info("[", r.User, "] StatusAll")
 	status, err := r.getAllStatus()
 	if err != nil {
 		return nil, err
@@ -109,6 +111,7 @@ func (r *Restartd) Status(req *model.Request) (resp *model.Response, err error) 
 	if err != nil {
 		return nil, err
 	}
+	log.Info("[", r.User, "] Status : ", service.Name, " ", status.State)
 
 	return model.NewOKResponse(status)
 }
