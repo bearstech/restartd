@@ -54,7 +54,12 @@ func (rs *RestartServer) Config() error {
 		log.Error("No conf found. Add some yml file in " + rs.confFolder)
 		//os.Exit(-1)
 	}
+	olds := make(map[string]bool)
+	for name, _ := range rs.servers.Names {
+		olds[name] = true
+	}
 	for _, conf := range confs {
+		delete(olds, conf.User)
 		r := &restartd.Restartd{
 			PrefixService: rs.prefix,
 			User:          conf.User,
@@ -72,6 +77,9 @@ func (rs *RestartServer) Config() error {
 		myserver.Register("reload", r.Reload)
 
 		log.Info("Add user ", conf.User)
+	}
+	for name, _ := range olds {
+		rs.servers.RemoveUser(name)
 	}
 	log.Info("Number of users : ", len(confs))
 	return nil
