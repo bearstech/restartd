@@ -93,6 +93,10 @@ func (rs *RestartServer) Serve() {
 	rs.servers.Serve()
 }
 
+func (rs *RestartServer) Wait() {
+	rs.servers.Wait()
+}
+
 func main() {
 
 	var prefix bool = true
@@ -131,6 +135,7 @@ func main() {
 		if err != nil {
 			return err
 		}
+		rs.Serve()
 
 		cc := make(chan os.Signal, 1)
 		signal.Notify(cc, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1, syscall.SIGTERM)
@@ -148,12 +153,13 @@ func main() {
 					if err != nil {
 						panic(err)
 					}
+					rs.Serve()
 				}
 			}
 		}()
 
-		// listen and block
-		rs.Serve()
+		// block
+		rs.Wait()
 		return nil
 	}
 	err := app.Run(os.Args)
