@@ -2,16 +2,88 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/bearstech/ascetic-rpc/server"
 	"github.com/bearstech/restartd/restartd"
 	"github.com/urfave/cli"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 var GITCOMMIT string
+
+type RestartServer struct {
+	confs      []*restartd.Conf
+	servers    *server.ServerUsers
+	confFolder string
+	prefix     bool
+}
+
+func NewRestartServer(prefix bool) (*RestartServer, error) {
+	fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
+	if fldr == "" {
+		fldr = "/tmp/restartd"
+	}
+
+	err := os.Chmod(fldr, os.FileMode(0755))
+	if err != nil {
+		return nil, err
+	}
+	servers := server.NewServerUsers(fldr, "restart.sock")
+	confFolder := os.Getenv("RESTARTD_CONF")
+
+	if confFolder == "" {
+		confFolder = "/etc/restartd/conf.d"
+	}
+	log.Info("Conf folder is ", confFolder)
+	return &RestartServer{
+		servers:    servers,
+		confFolder: confFolder,
+		prefix:     prefix,
+	}, nil
+}
+
+func (rs *RestartServer) Config() error {
+	confs, err := restartd.ReadConfFolder(rs.confFolder)
+	if err != nil {
+		return err
+	}
+	if len(confs) == 0 {
+		log.Error("No conf found. Add some yml file in " + rs.confFolder)
+		//os.Exit(-1)
+	}
+	for _, conf := range confs {
+		r := &restartd.Restartd{
+			PrefixService: rs.prefix,
+			User:          conf.User,
+			Services:      conf.Services,
+		}
+		myserver, err := rs.servers.AddUser(conf.User)
+		if err != nil {
+			return err
+		}
+		myserver.Register("statusAll", r.StatusAll)
+		myserver.Register("status", r.Status)
+		myserver.Register("start", r.Start)
+		myserver.Register("stop", r.Stop)
+		myserver.Register("restart", r.Restart)
+		myserver.Register("reload", r.Reload)
+
+		log.Info("Add user ", conf.User)
+	}
+	log.Info("Number of users : ", len(confs))
+	return nil
+}
+
+func (rs *RestartServer) Stop() {
+	rs.servers.Stop()
+}
+
+func (rs *RestartServer) Serve() {
+	rs.servers.Serve()
+}
 
 func main() {
 
@@ -41,56 +113,16 @@ func main() {
 			prefix = false
 		}
 
-		fldr := os.Getenv("RESTARTD_SOCKET_FOLDER")
-		if fldr == "" {
-			fldr = "/tmp/restartd"
-		}
-
-		err := os.Chmod(fldr, os.FileMode(0755))
+		rs, err := NewRestartServer(prefix)
 		if err != nil {
 			return err
 		}
-		servers := server.NewServerUsers(fldr, "restart.sock")
 
-		confFolder := os.Getenv("RESTARTD_CONF")
-
-		if confFolder == "" {
-			confFolder = "/etc/restartd/conf.d"
-		}
-		log.Info("Conf folder is ", confFolder)
-
-		configs := func() {
-			confs, err := restartd.ReadConfFolder(confFolder)
-			if err != nil {
-				panic(err)
-			}
-			if len(confs) == 0 {
-				log.Error("No conf found. Add some yml file in " + confFolder)
-				//os.Exit(-1)
-			}
-			for _, conf := range confs {
-				r := &restartd.Restartd{
-					PrefixService: prefix,
-					User:          conf.User,
-					Services:      conf.Services,
-				}
-				myserver, err := servers.AddUser(conf.User)
-				if err != nil {
-					panic(err)
-				}
-				myserver.Register("statusAll", r.StatusAll)
-				myserver.Register("status", r.Status)
-				myserver.Register("start", r.Start)
-				myserver.Register("stop", r.Stop)
-				myserver.Register("restart", r.Restart)
-				myserver.Register("reload", r.Reload)
-
-				log.Info("Add user ", conf.User)
-			}
-			log.Info("Number of users : ", len(confs))
-		}
 		// initial config
-		configs()
+		err = rs.Config()
+		if err != nil {
+			return err
+		}
 
 		cc := make(chan os.Signal, 1)
 		signal.Notify(cc, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1, syscall.SIGTERM)
@@ -100,17 +132,20 @@ func main() {
 				log.Info("Signal : ", s)
 				switch s {
 				case os.Interrupt:
-					servers.Stop()
+					rs.Stop()
 				case syscall.SIGTERM:
-					servers.Stop()
+					rs.Stop()
 				case syscall.SIGHUP:
-					configs()
+					err := rs.Config()
+					if err != nil {
+						panic(err)
+					}
 				}
 			}
 		}()
 
 		// listen and block
-		servers.Serve()
+		rs.Serve()
 		return nil
 	}
 	err := app.Run(os.Args)
