@@ -27,17 +27,18 @@ func NewRestartServer(prefix bool) (*RestartServer, error) {
 		fldr = "/tmp/restartd"
 	}
 
-	err := os.Chmod(fldr, os.FileMode(0755))
-	if err != nil {
-		return nil, err
-	}
 	servers := server.NewServerUsers(fldr, "restart.sock")
 	confFolder := os.Getenv("RESTARTD_CONF")
-
 	if confFolder == "" {
 		confFolder = "/etc/restartd/conf.d"
 	}
 	log.Info("Conf folder is ", confFolder)
+
+	err := servers.MakeFolder()
+	if err != nil {
+		return nil, err
+	}
+
 	return &RestartServer{
 		servers:    servers,
 		confFolder: confFolder,
