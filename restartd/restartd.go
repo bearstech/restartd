@@ -3,7 +3,7 @@ package restartd
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/bearstech/ascetic-rpc/model"
+	"github.com/bearstech/ascetic-rpc/message"
 	"github.com/bearstech/restartd/systemd"
 )
 
@@ -90,17 +90,17 @@ RPC
 
 */
 
-func (r *Restartd) StatusAll(req *model.Request) (resp *model.Response, err error) {
+func (r *Restartd) StatusAll(req *message.Request) (resp *message.Response, err error) {
 	log.Info("[", r.User, "] StatusAll")
 	status, err := r.getAllStatus()
 	if err != nil {
 		return nil, err
 	}
 
-	return model.NewOKResponse(&Status{Status: status})
+	return message.NewOKResponse(&Status{Status: status})
 }
 
-func (r *Restartd) Status(req *model.Request) (resp *model.Response, err error) {
+func (r *Restartd) Status(req *message.Request) (resp *message.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
 	if err != nil {
@@ -113,10 +113,10 @@ func (r *Restartd) Status(req *model.Request) (resp *model.Response, err error) 
 	}
 	log.Info("[", r.User, "] Status : ", service.Name, " ", status.State)
 
-	return model.NewOKResponse(status)
+	return message.NewOKResponse(status)
 }
 
-func (r *Restartd) Start(req *model.Request) (resp *model.Response, err error) {
+func (r *Restartd) Start(req *message.Request) (resp *message.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
 	if err != nil {
@@ -134,10 +134,10 @@ func (r *Restartd) Start(req *model.Request) (resp *model.Response, err error) {
 		return nil, err
 	}
 
-	return model.NewOKResponse(nil)
+	return message.NewOKResponse(nil)
 }
 
-func (r *Restartd) Stop(req *model.Request) (resp *model.Response, err error) {
+func (r *Restartd) Stop(req *message.Request) (resp *message.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
 	if err != nil {
@@ -155,10 +155,10 @@ func (r *Restartd) Stop(req *model.Request) (resp *model.Response, err error) {
 		return nil, err
 	}
 
-	return model.NewOKResponse(nil)
+	return message.NewOKResponse(nil)
 }
 
-func (r *Restartd) Restart(req *model.Request) (resp *model.Response, err error) {
+func (r *Restartd) Restart(req *message.Request) (resp *message.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
 	if err != nil {
@@ -176,10 +176,10 @@ func (r *Restartd) Restart(req *model.Request) (resp *model.Response, err error)
 		return nil, err
 	}
 
-	return model.NewOKResponse(nil)
+	return message.NewOKResponse(nil)
 }
 
-func (r *Restartd) Reload(req *model.Request) (resp *model.Response, err error) {
+func (r *Restartd) Reload(req *message.Request) (resp *message.Response, err error) {
 	var service Service
 	err = req.GetBody(&service)
 	if err != nil {
@@ -196,5 +196,5 @@ func (r *Restartd) Reload(req *model.Request) (resp *model.Response, err error) 
 		return nil, err
 	}
 
-	return model.NewOKResponse(nil)
+	return message.NewOKResponse(nil)
 }
