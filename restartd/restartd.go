@@ -113,7 +113,7 @@ func (r *Restartd) Status(req *message.Request) (resp *message.Response, err err
 	}
 	log.Info("[", r.User, "] Status : ", service.Name, " ", status.State)
 
-	return message.NewOKResponse(status)
+	return message.NewOKResponse(&Status{Status: []*Status_State{status}})
 }
 
 func (r *Restartd) Start(req *message.Request) (resp *message.Response, err error) {
