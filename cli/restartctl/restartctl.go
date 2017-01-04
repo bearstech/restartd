@@ -65,12 +65,12 @@ func main() {
 		service := c.Args().Get(0)
 		function := c.Args().Get(1)
 		if function == "status" {
-			var states restartd.Status
-			err = cl.Do(function, &restartd.Service{Name: service}, &states)
+			var status restartd.Status
+			err = cl.Do(function, &restartd.Service{Name: service}, &status)
 			if err != nil {
 				return err
 			}
-			for _, state := range states.Status {
+			for _, state := range status.Status {
 				fmt.Printf("%s %s\n", state.Name, restartd.Status_States_name[int32(state.State)])
 			}
 			return nil
