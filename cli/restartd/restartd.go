@@ -3,10 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 
 	log "github.com/Sirupsen/logrus"
+	application "github.com/bearstech/ascetic-rpc/app"
 	"github.com/bearstech/ascetic-rpc/server"
 	"github.com/bearstech/restartd/restartd"
 	"github.com/urfave/cli"
@@ -27,14 +26,17 @@ func NewRestartServer(prefix bool) (*RestartServer, error) {
 		fldr = "/tmp/restartd"
 	}
 
-	servers := server.NewServerUsers(fldr, "restart.sock")
+	servers, err := server.NewServerUsers(fldr, "restart.sock").WithGroup("restartd")
+	if err != nil {
+		return nil, err
+	}
 	confFolder := os.Getenv("RESTARTD_CONF")
 	if confFolder == "" {
 		confFolder = "/etc/restartd/conf.d"
 	}
 	log.Info("Conf folder is ", confFolder)
 
-	err := servers.MakeFolder()
+	err = servers.MakeFolder()
 	if err != nil {
 		return nil, err
 	}
@@ -86,16 +88,8 @@ func (rs *RestartServer) Config() error {
 	return nil
 }
 
-func (rs *RestartServer) Stop() {
-	rs.servers.Stop()
-}
-
-func (rs *RestartServer) Serve() {
-	rs.servers.Serve()
-}
-
-func (rs *RestartServer) Wait() {
-	rs.servers.Wait()
+func (rs *RestartServer) GetServers() *server.ServerUsers {
+	return rs.servers
 }
 
 func main() {
@@ -131,42 +125,11 @@ func main() {
 			return err
 		}
 
-		// initial config
-		err = rs.Config()
-		if err != nil {
-			return err
-		}
-		rs.Serve()
-
-		cc := make(chan os.Signal, 1)
-		signal.Notify(cc, os.Interrupt, syscall.SIGHUP, syscall.SIGUSR1, syscall.SIGTERM)
-		go func() {
-			for {
-				s := <-cc
-				log.Info("Signal : ", s)
-				switch s {
-				case os.Interrupt:
-					rs.Stop()
-				case syscall.SIGTERM:
-					rs.Stop()
-				case syscall.SIGHUP:
-					err := rs.Config()
-					if err != nil {
-						panic(err)
-					}
-					rs.Serve()
-				}
-			}
-		}()
-
-		// block
-		rs.Wait()
-		return nil
+		return application.NewApplication(rs).Start()
 	}
-	err := app.Run(os.Args)
-	if err != nil {
-		// FIXME yell to STDERR
-		fmt.Println(err)
+
+	if err := app.Run(os.Args); err != nil {
+		log.Error(err)
 		os.Exit(-1)
 	}
 }
